@@ -32,7 +32,7 @@ namespace back_net.Controllers
             if (usuario == null)
                 return Unauthorized(new { message = "Usuario no encontrado o inactivo." });
 
-            // Validar contraseña (hash)
+            // Validar contraseña HASH
             if (!VerificarContrasena(request.Contrasena, usuario.ContrasenaHash))
                 return Unauthorized(new { message = "Contraseña incorrecta." });
 
@@ -54,7 +54,7 @@ namespace back_net.Controllers
             });
         }
 
-        // Función para verificar hash
+        // verificar hash
         private bool VerificarContrasena(string contrasena, string hashAlmacenado)
         {
             using (var sha256 = SHA256.Create())
