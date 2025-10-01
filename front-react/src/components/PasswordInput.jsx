@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import "../css/PasswordInput.css";
 
-
+// logica para mostrar y ocultar contraseña//
 function PasswordInput({ value, onChange, placeholder = "Contraseña" }) {
   const [showPassword, setShowPassword] = useState(false);
 

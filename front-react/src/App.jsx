@@ -1,11 +1,21 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Login from "./Login.jsx"
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./Login.jsx";
+import GestionMoldes from "./GestionMoldes.jsx";
+import './css/Global.css' 
+
 
 function App() {
-  return <Login />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Ruta principal = login */}
+        <Route path="/" element={<Login />} />
+
+        {/* vista de gestion de moldes*/}
+        <Route path="/moldes" element={<GestionMoldes />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

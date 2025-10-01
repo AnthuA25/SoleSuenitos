@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./css/Login.css";
 import PasswordInput from "./components/PasswordInput";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom"; 
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -11,13 +12,14 @@ function Login() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isRecovering, setIsRecovering] = useState(false);
 
+  const navigate = useNavigate(); 
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (isRecovering) {
       console.log("Recuperar contraseña:", { email, newPassword, confirmPassword });
 
-      // Validación de contaseñas
       if (newPassword !== confirmPassword) {
         Swal.fire({
           title: "Error",
@@ -27,14 +29,12 @@ function Login() {
         return;
       }
 
-      // Modal
       Swal.fire({
         title: "Tu constraseña se ha actualizado correctamente.",
         text: "Inicia sesión nuevamente",
         icon: "success",
         confirmButtonText: "Aceptar",
       }).then(() => {
-        // Vuelve al login después de cerrar el modal
         setIsRecovering(false);
         setNewPassword("");
         setConfirmPassword("");
@@ -42,12 +42,22 @@ function Login() {
     } else {
       console.log("Login:", { email, rol, password });
 
-      // Modal de inicio de sesión exitoso
-      Swal.fire({
-        title: "Bienvenido",
-        text: `!Hola ${email}¡`,
-        icon: "success",
-      });
+    
+      if (email && password) {
+        Swal.fire({
+          title: "Bienvenido",
+          text: `¡Hola ${email}!`,
+          icon: "success",
+        }).then(() => {
+          navigate("/moldes"); // 
+        });
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Debes ingresar tus credenciales",
+          icon: "error",
+        });
+      }
     }
   };
 
