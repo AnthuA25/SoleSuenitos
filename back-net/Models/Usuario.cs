@@ -25,7 +25,7 @@ public partial class Usuario
 
     public virtual ICollection<ComentariosOp> ComentariosOps { get; set; } = new List<ComentariosOp>();
 
-    public virtual Role IdRoleNavigation { get; set; } = null!;
+    public virtual Role? IdRoleNavigation { get; set; } = null!;
 
     public virtual ICollection<InspeccionesCalidad> InspeccionesCalidads { get; set; } = new List<InspeccionesCalidad>();
 
