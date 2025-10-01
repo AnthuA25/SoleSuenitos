@@ -1,0 +1,22 @@
+# Visual Studio / .NET build folders
+bin/
+obj/
+[Bb]uild/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+*.bak
+
+# Configuration and publish
+appsettings.Development.json
+appsettings.Local.json
+publish/
+
+# env
+.env
