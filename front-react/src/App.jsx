@@ -3,6 +3,7 @@ import Login from "./Login.jsx";
 import GestionMoldes from "./GestionMoldes.jsx";
 import HistorialMoldes from "./HistorialMoldes.jsx";
 import RecepcionRollos from "./RecepcionRollos.jsx";
+import OrdenProduccion from "./OrdenProduccion.jsx";
 import './css/Global.css' 
 
 
@@ -21,6 +22,9 @@ function App() {
 
         {/*vista de recepcion de Rollos*/}
         <Route path="/recepcionrollos" element={<RecepcionRollos />} />
+
+        {/*vista de Orden de Produccion*/}
+        <Route path="/ordenproduccion" element={<OrdenProduccion />} />
       </Routes>
     </BrowserRouter>
   );

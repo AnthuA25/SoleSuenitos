@@ -97,7 +97,7 @@ function HistorialMoldes() {
             <li className="active">Historial de Moldes</li>
             <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
             <li>Historial de Rollos</li>
-            <li>Orden de Producción</li>
+            <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
             <li>Historial de Optimización</li>
           </ul>
 
