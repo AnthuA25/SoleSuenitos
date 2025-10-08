@@ -1,6 +1,8 @@
+
 import { useState } from "react";
 import "./css/Login.css";
 import PasswordInput from "./components/PasswordInput";
+import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom"; 
 
@@ -11,10 +13,11 @@ function Login() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isRecovering, setIsRecovering] = useState(false);
+  
 
   const navigate = useNavigate(); 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e) => { 
     e.preventDefault();
 
     if (isRecovering) {
@@ -72,7 +75,7 @@ function Login() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* --- VISTA LOGIN --- */}
+    
           {!isRecovering && (
             <>
               <label>Correo Electrónico</label>
@@ -106,7 +109,7 @@ function Login() {
             </>
           )}
 
-          {/* --- VISTA RECUPERAR CONTRASEÑA --- */}
+      
           {isRecovering && (
             <>
               <label>Correo Electrónico</label>
@@ -145,3 +148,4 @@ function Login() {
 }
 
 export default Login;
+

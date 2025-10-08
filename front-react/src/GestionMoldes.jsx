@@ -1,4 +1,6 @@
+
 import { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "./css/GestionMoldes.css";
@@ -9,6 +11,7 @@ function GestionMoldes() {
   const [isDragging, setIsDragging] = useState(false);
   const navigate = useNavigate();
 
+  
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -213,7 +216,6 @@ function GestionMoldes() {
   return (
     <div className="gestion-container">
       <div className="gestion-box">
-        {/* Sidebar verde */}
         <div className="gestion-sidebar">
           <div>
             <h2>SOLE <br /> <span>Sueñitos</span></h2>
@@ -231,7 +233,7 @@ function GestionMoldes() {
           </button>
         </div>
 
-        {/* Contenido blanco */}
+      
         <div className="gestion-content">
           <h1>Gestión de moldes</h1>
           <h3>Registrar molde</h3>
@@ -298,3 +300,4 @@ function GestionMoldes() {
 
 export default GestionMoldes;
 /*aca me quede jeje*/
+
