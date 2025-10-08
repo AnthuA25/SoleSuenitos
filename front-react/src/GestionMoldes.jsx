@@ -219,7 +219,7 @@ function GestionMoldes() {
             <h2>SOLE <br /> <span>Sueñitos</span></h2>
             <ul>
               <li className="active">Gestión de Moldes</li>
-              <li>Historial de Moldes</li>
+              <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
               <li>Recepción de Rollos</li>
               <li>Historial de Rollos</li>
               <li>Orden de Producción</li>

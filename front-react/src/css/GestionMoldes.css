@@ -278,3 +278,111 @@
   font-size: 14px;
   color: #888;
 }
+
+/* --- HISTORIAL DE MOLDES --- */
+
+.historial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-registrar {
+  background-color: #2f6d6d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.btn-registrar:hover {
+  background-color: #255a5a;
+}
+
+.historial-filtros {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.filtro-select {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.buscar-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.buscar-container input {
+  border: none;
+  outline: none;
+  padding: 6px 8px;
+  width: 160px;
+}
+
+.buscar-container button {
+  background-color: #2f6d6d;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.btn-filtrar {
+  background-color: #ddd;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.historial-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.historial-tabla th,
+.historial-tabla td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.historial-tabla th {
+  background-color: #f4f6f6;
+  color: #333;
+}
+
+.tabla-acciones {
+  display: flex;
+  gap: 10px;
+}
+
+.icono-ver,
+.icono-eliminar {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.icono-ver:hover {
+  color: #2f6d6d;
+}
+
+.icono-eliminar:hover {
+  color: #d33;
+}

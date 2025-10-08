@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./Login.jsx";
 import GestionMoldes from "./GestionMoldes.jsx";
+import HistorialMoldes from "./HistorialMoldes.jsx";
 import './css/Global.css' 
 
 
@@ -13,6 +14,9 @@ function App() {
 
         {/* vista de gestion de moldes*/}
         <Route path="/moldes" element={<GestionMoldes />} />
+        
+        {/*vista de historial de moldes*/}
+        <Route path="/historialmoldes" element={<HistorialMoldes />} />
       </Routes>
     </BrowserRouter>
   );
