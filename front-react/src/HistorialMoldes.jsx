@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import "./css/GestionMoldes.css";  // Reutilizamos tus estilos base
-import { FaPlus, FaSearch, FaEye, FaTrashAlt } from "react-icons/fa";
+import logo_blanco from "./images/logo_blanco.svg"; 
+import "./css/GestionMoldes.css";
+import { FaEye, FaTrashAlt, FaSearch, FaPlus } from "react-icons/fa";
 
 function HistorialMoldes() {
   const navigate = useNavigate();
@@ -84,17 +85,22 @@ function HistorialMoldes() {
       <div className="gestion-box">
         {/* Sidebar */}
         <div className="gestion-sidebar">
-          <div>
-            <h2>SOLE <br /> <span>Sueñitos</span></h2>
-            <ul>
-              <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
-              <li className="active" onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
-              <li>Recepción de Rollos</li>
-              <li>Historial de Rollos</li>
-              <li>Orden de Producción</li>
-              <li>Historial de Optimización</li>
-            </ul>
+          <div className="sidebar-header">
+            <img src={logo_blanco} alt="Logo" className="logo_blanco-img" />
+            <div className="sidebar-title">
+              <h2>SOLE</h2> <span>Sueñitos</span>
+            </div>
           </div>
+
+          <ul>
+            <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
+            <li className="active">Historial de Moldes</li>
+            <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
+            <li>Historial de Rollos</li>
+            <li>Orden de Producción</li>
+            <li>Historial de Optimización</li>
+          </ul>
+
           <button className="gestion-logout" onClick={handleLogout}>
             Cerrar Sesión
           </button>

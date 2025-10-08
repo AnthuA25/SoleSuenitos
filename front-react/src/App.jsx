@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./Login.jsx";
 import GestionMoldes from "./GestionMoldes.jsx";
 import HistorialMoldes from "./HistorialMoldes.jsx";
+import RecepcionRollos from "./RecepcionRollos.jsx";
 import './css/Global.css' 
 
 
@@ -17,6 +18,9 @@ function App() {
         
         {/*vista de historial de moldes*/}
         <Route path="/historialmoldes" element={<HistorialMoldes />} />
+
+        {/*vista de recepcion de Rollos*/}
+        <Route path="/recepcionrollos" element={<RecepcionRollos />} />
       </Routes>
     </BrowserRouter>
   );
