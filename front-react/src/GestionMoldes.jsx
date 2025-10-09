@@ -233,64 +233,68 @@ function GestionMoldes() {
 
         {/* Contenido blanco */}
         <div className="gestion-content">
-          <h1>Gestión de moldes</h1>
-          <h3>Registrar molde</h3>
+  <h1>Gestión de moldes</h1>
+  <h3>Registrar molde</h3>
 
-          <form onSubmit={handleSubmit} className="gestion-form">
-            <label>Cargar Archivo</label>
-            <div 
-              className={`file-drop-zone ${isDragging ? 'dragging' : ''}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <input 
-                type="file" 
-                accept=".dxl"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-                id="file-input"
-              />
-              <label htmlFor="file-input" className="file-drop-label">
-                {file ? (
-                  <div>
-                    <strong>Archivo seleccionado:</strong><br />
-                    {file.name}
-                  </div>
-                ) : (
-                  <div>
-                    <strong>Arrastra para subir</strong><br />
-                    <span>o haz clic para seleccionar archivo .dxl</span>
-                  </div>
-                )}
-              </label>
-            </div>
+  <form onSubmit={handleSubmit} className="gestion-form">
+    <label htmlFor="file-input">Cargar Archivo</label>
+    <div
+      className={`file-drop-zone ${isDragging ? 'dragging' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <input
+        type="file"
+        accept=".dxl"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+        id="file-input"
+      />
+      <label htmlFor="file-input" className="file-drop-label">
+        {file ? (
+          <div>
+            <strong>Archivo seleccionado:</strong><br />
+            {file.name}
+          </div>
+        ) : (
+          <div>
+            <strong>Arrastra para subir</strong><br />
+            <span>o haz clic para seleccionar archivo .dxl</span>
+          </div>
+        )}
+      </label>
+    </div>
 
-            <label>Nombre del molde</label>
-            <input 
-              type="text"
-              value={nombreMolde}
-              onChange={(e) => setNombreMolde(e.target.value)}
-              placeholder="Ej: Molde Pantalón"
-            />
+    {/* 🔧 Fix aquí */}
+    <label htmlFor="molde-nombre">Nombre del molde</label>
+    <input
+      id="molde-nombre"
+      name="nombreMolde"
+      type="text"
+      value={nombreMolde}
+      onChange={(e) => setNombreMolde(e.target.value)}
+      placeholder="Ej: Molde Pantalón"
+    />
 
-            <div className="gestion-form-buttons">
-              <button 
-                type="button" 
-                className="gestion-cancel-button"
-                onClick={handleCancel}
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                className="gestion-save-button"
-              >
-                Guardar molde
-              </button>
-            </div>
-          </form>
-        </div>
+    <div className="gestion-form-buttons">
+      <button
+        type="button"
+        className="gestion-cancel-button"
+        onClick={handleCancel}
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        className="gestion-save-button"
+      >
+        Guardar molde
+      </button>
+    </div>
+  </form>
+</div>
+
       </div>
     </div>
   );
