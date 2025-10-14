@@ -12,6 +12,7 @@ ezdxf==1.4.2
 fastapi==0.118.0
 Flask==3.1.2
 fonttools==4.60.1
+geomdl==5.4.0
 h11==0.16.0
 idna==3.10
 immutabledict==4.2.1
