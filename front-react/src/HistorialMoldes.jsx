@@ -59,7 +59,6 @@ function HistorialMoldes() {
           text: "El molde ha sido eliminado correctamente",
           icon: "success",
           confirmButtonColor: "#2f6d6d",
-          timer: 1500,
         });
       }
     });
@@ -96,7 +95,7 @@ function HistorialMoldes() {
             <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
             <li className="active">Historial de Moldes</li>
             <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
-            <li>Historial de Rollos</li>
+            <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
             <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
             <li>Historial de Optimización</li>
           </ul>

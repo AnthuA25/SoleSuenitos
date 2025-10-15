@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo_blanco from "./images/logo_blanco.svg";
@@ -6,6 +6,7 @@ import "./css/GestionMoldes.css";
 
 function OrdenProduccion() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [modelo, setModelo] = useState("");
   const [talla, setTalla] = useState("");
@@ -13,36 +14,13 @@ function OrdenProduccion() {
   const [rollos, setRollos] = useState(["R-2025-002", "R-2025-001"]);
 
   const moldes = [
-    {
-      pieza: "Delantero",
-      dimensiones: "600 × 800",
-      area: 4800,
-      repeticiones: 1,
-      orientacion: "Recto hilo",
-    },
-    {
-      pieza: "Espalda",
-      dimensiones: "600 × 800",
-      area: 4800,
-      repeticiones: 1,
-      orientacion: "Recto hilo",
-    },
-    {
-      pieza: "Manga",
-      dimensiones: "400 × 600",
-      area: 2400,
-      repeticiones: 2,
-      orientacion: "Libre",
-    },
-    {
-      pieza: "Cuello",
-      dimensiones: "100 × 400",
-      area: 400,
-      repeticiones: 1,
-      orientacion: "Restringido",
-    },
+    { pieza: "Delantero", dimensiones: "600 × 800", area: 4800, repeticiones: 1, orientacion: "Recto hilo" },
+    { pieza: "Espalda", dimensiones: "600 × 800", area: 4800, repeticiones: 1, orientacion: "Recto hilo" },
+    { pieza: "Manga", dimensiones: "400 × 600", area: 2400, repeticiones: 2, orientacion: "Libre" },
+    { pieza: "Cuello", dimensiones: "100 × 400", area: 400, repeticiones: 1, orientacion: "Restringido" },
   ];
 
+  // 🔹 Cerrar sesión
   const handleLogout = () => {
     Swal.fire({
       title: "¿Cerrar sesión?",
@@ -57,11 +35,43 @@ function OrdenProduccion() {
     });
   };
 
+  // 🔹 Optimización de corte
   const handleOptimizarCorte = () => {
     Swal.fire({
       title: "Corte optimizado",
       text: "Se generó la optimización del corte correctamente.",
       icon: "success",
+      confirmButtonColor: "#2f6d6d",
+    });
+  };
+
+  // 🔹 Click en “Subir molde”
+  const handleSubirMoldeClick = () => {
+    fileInputRef.current.click(); // abre el explorador de archivos
+  };
+
+  // 🔹 Manejo del archivo seleccionado
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const extension = file.name.split(".").pop().toLowerCase();
+
+    if (extension !== "dxl") {
+      Swal.fire({
+        icon: "error",
+        title: "Formato no permitido",
+        text: "Solo se aceptan archivos con extensión .dxl",
+        confirmButtonColor: "#d33",
+      });
+      event.target.value = ""; // limpia el input
+      return;
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Archivo cargado",
+      text: `Se seleccionó el archivo: ${file.name}`,
       confirmButtonColor: "#2f6d6d",
     });
   };
@@ -78,16 +88,14 @@ function OrdenProduccion() {
               <span>Sueñitos</span>
             </div>
           </div>
-
           <ul>
             <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
             <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
             <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
-            <li>Historial de Rollos</li>
+            <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
             <li className="active">Orden de Producción</li>
             <li>Historial de Optimización</li>
           </ul>
-
           <button className="orden-logout" onClick={handleLogout}>
             Cerrar Sesión
           </button>
@@ -100,7 +108,7 @@ function OrdenProduccion() {
           <div className="orden-inputs">
             <div className="input-group">
               <label>Modelo</label>
-              <input type="text" value={modelo} onChange={(e) => setModelo(e.target.value)}  />
+              <input type="text" value={modelo} onChange={(e) => setModelo(e.target.value)} />
             </div>
 
             <div className="input-group">
@@ -125,7 +133,16 @@ function OrdenProduccion() {
 
           {/* Botones */}
           <div className="orden-buttons">
-            <button className="subir-btn">📤 Subir molde</button>
+            <button className="subir-btn" onClick={handleSubirMoldeClick}>
+              📤 Subir molde
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".dxl"
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
             <button className="elegir-btn">Elegir molde</button>
           </div>
 
@@ -166,3 +183,4 @@ function OrdenProduccion() {
 }
 
 export default OrdenProduccion;
+

@@ -226,7 +226,7 @@ function GestionMoldes() {
               <li className="active">Gestión de Moldes</li>
               <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
               <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
-              <li>Historial de Rollos</li>
+              <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
               <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
               <li>Historial de Optimización</li>
             </ul>

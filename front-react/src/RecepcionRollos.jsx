@@ -13,7 +13,8 @@ function RecepcionRollos() {
   const [proveedor, setProveedor] = useState("");
 
   // Manejo del formulario
-  const handleGuardar = () => {
+  const handleGuardar = (e) => {
+    e.preventDefault();
     if (!tipoTela || !ancho || !color || !metraje || !proveedor) {
       Swal.fire({
         title: "¡Error!",
@@ -27,7 +28,13 @@ function RecepcionRollos() {
         text: "La recepción del rollo se guardó correctamente.",
         icon: "success",
         confirmButtonColor: "#2f6d6d",
-      });
+      }).then(() => {
+        setTipoTela("");
+        setAncho("");
+        setColor("");
+        setMetraje("");
+        setProveedor("");
+      });;
     }
   };
 
@@ -62,7 +69,7 @@ function RecepcionRollos() {
             <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
             <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
             <li className="active">Recepción de Rollos</li>
-            <li>Historial de Rollos</li>
+            <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
             <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
             <li>Historial de Optimización</li>
           </ul>
