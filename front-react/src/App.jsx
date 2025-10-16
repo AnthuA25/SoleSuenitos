@@ -6,9 +6,9 @@ import HistorialMoldes from "./HistorialMoldes.jsx";
 import RecepcionRollos from "./RecepcionRollos.jsx";
 import HistorialRollos from "./HistorialRollos.jsx";
 import OrdenProduccion from "./OrdenProduccion.jsx";
-import Optimizacion from "./Optimizacion.jsx";
 import './css/Global.css' 
 import HistorialOptimizaciones from "./HistorialOptimizaciones.jsx";
+
 
 
 function App() {
@@ -33,12 +33,11 @@ function App() {
         {/*vista de Orden de Produccion*/}
         <Route path="/ordenproduccion" element={<OrdenProduccion />} />
 
-        {/*vista de Optimizacionv1*/}
-        <Route path="/optimizacion" element={<Optimizacion />} />
+      {/*vista de Optimizacionv1*/}
+        <Route path="/optimizacion" element={<Optimizacion />} />   
 
-        {/*vista de Historial de Optimizacion*/}
+      {/*vista de Historial de Optimizacion*/}
         <Route path="/historialopti" element={<HistorialOptimizaciones />} />
-
       </Routes>
     </BrowserRouter>
   );
