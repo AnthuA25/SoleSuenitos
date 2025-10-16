@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import logo_blanco from "./images/logo_blanco.svg"; 
 import "./css/GestionMoldes.css";
 
 function GestionMoldes() {
@@ -217,17 +218,21 @@ function GestionMoldes() {
     <div className="gestion-container">
       <div className="gestion-box">
         <div className="gestion-sidebar">
-          <div>
-            <h2>SOLE <br /> <span>Sueñitos</span></h2>
+          <div className="sidebar-header">
+            <img src={logo_blanco} alt="Logo" className="logo_blanco-img" />
+            <div className="sidebar-title">
+              <h2>SOLE <br /> <span>Sueñitos</span></h2>
+            </div>
+          </div>  
             <ul>
               <li className="active">Gestión de Moldes</li>
-              <li>Historial de Moldes</li>
-              <li>Recepción de Rollos</li>
+              <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
+              <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
               <li>Historial de Rollos</li>
-              <li>Orden de Producción</li>
+              <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
               <li>Historial de Optimización</li>
             </ul>
-          </div>
+          
           <button className="gestion-logout" onClick={handleLogout}>
             Cerrar Sesión
           </button>
