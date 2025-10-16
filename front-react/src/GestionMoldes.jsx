@@ -1,6 +1,4 @@
-
 import { useState } from "react";
-
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo_blanco from "./images/logo_blanco.svg"; 
@@ -10,14 +8,18 @@ function GestionMoldes() {
   const [file, setFile] = useState(null);
   const [nombreMolde, setNombreMolde] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
   const navigate = useNavigate();
 
-  
+  // Datos de usuario de prueba
+  const user = { nombre: "Sole Suenito" };
+  const userInicial = user.nombre.charAt(0).toUpperCase();
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      // Mostrar modal de confirmación de archivo
       showFileConfirmModal(selectedFile);
     }
   };
@@ -49,7 +51,6 @@ function GestionMoldes() {
     }
   };
 
-  // Modal para confirmar subida de archivo
   const showFileConfirmModal = (selectedFile) => {
     Swal.fire({
       title: 'Subir archivo',
@@ -70,7 +71,6 @@ function GestionMoldes() {
       denyButtonColor: '#ff6b6b'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Archivo confirmado, se mantiene
         Swal.fire({
           title: '¡Archivo cargado!',
           text: 'El archivo se ha cargado correctamente',
@@ -79,9 +79,7 @@ function GestionMoldes() {
           timer: 2000
         });
       } else if (result.isDenied) {
-        // Eliminar archivo
         setFile(null);
-        // Limpiar input file
         const fileInput = document.querySelector('input[type="file"]');
         if (fileInput) fileInput.value = '';
         Swal.fire({
@@ -92,7 +90,6 @@ function GestionMoldes() {
           timer: 1500
         });
       } else {
-        // Cancelar - eliminar archivo
         setFile(null);
         const fileInput = document.querySelector('input[type="file"]');
         if (fileInput) fileInput.value = '';
@@ -102,8 +99,6 @@ function GestionMoldes() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Validaciones
     if (!file) {
       Swal.fire({
         title: "Archivo requerido",
@@ -113,7 +108,6 @@ function GestionMoldes() {
       });
       return;
     }
-
     if (!nombreMolde.trim()) {
       Swal.fire({
         title: "Nombre requerido",
@@ -123,8 +117,6 @@ function GestionMoldes() {
       });
       return;
     }
-
-    // Mostrar modal de confirmación final
     Swal.fire({
       title: 'Confirmar registro',
       html: `
@@ -142,10 +134,7 @@ function GestionMoldes() {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Registrar molde
         console.log("Molde guardado:", { file, nombreMolde });
-        
-        // Mostrar modal de éxito
         Swal.fire({
           title: "¡Registro exitoso!",
           text: "El molde se ha registrado correctamente",
@@ -153,7 +142,6 @@ function GestionMoldes() {
           confirmButtonColor: '#2f6d6d',
           confirmButtonText: 'Aceptar'
         }).then(() => {
-          // Resetear formulario después del éxito
           setFile(null);
           setNombreMolde("");
           const fileInput = document.querySelector('input[type="file"]');
@@ -217,29 +205,45 @@ function GestionMoldes() {
   return (
     <div className="gestion-container">
       <div className="gestion-box">
+        {/* SIDEBAR */}
         <div className="gestion-sidebar">
           <div className="sidebar-header">
             <img src={logo_blanco} alt="Logo" className="logo_blanco-img" />
             <div className="sidebar-title">
               <h2>SOLE <br /> <span>Sueñitos</span></h2>
             </div>
-          </div>  
-            <ul>
-              <li className="active">Gestión de Moldes</li>
-              <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
-              <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
-              <li>Historial de Rollos</li>
-              <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
-              <li>Historial de Optimización</li>
-            </ul>
-          
-          <button className="gestion-logout" onClick={handleLogout}>
-            Cerrar Sesión
-          </button>
+          </div>
+          <ul>
+            <li className="active">Gestión de Moldes</li>
+            <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
+            <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
+            <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
+            <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
+            <li onClick={() => navigate("/historialopti")}>Historial de Optimización</li>
+          </ul>
         </div>
 
-      
+        {/* CONTENIDO */}
         <div className="gestion-content">
+        {/* HEADER superior */}
+        <div className="gestion-header">
+          <div className="user-menu-container">
+            <div 
+              className="user-button" 
+              onClick={() => setShowUserMenu(!showUserMenu)}
+            >
+              <div className="user-circle">{userInicial}</div>
+              <span className="user-name">{user.nombre}</span>
+            </div>
+            {showUserMenu && (
+              <div className="user-dropdown_sesion">
+                <button className="botoncerrarsesion" onClick={handleLogout}>Cerrar sesión</button>
+              </div>
+            )}
+          </div>
+        </div>      
+
+
           <h1>Gestión de moldes</h1>
           <h3>Registrar molde</h3>
 
@@ -279,6 +283,7 @@ function GestionMoldes() {
               value={nombreMolde}
               onChange={(e) => setNombreMolde(e.target.value)}
               placeholder="Ej: Molde Pantalón"
+              style={{backgroundColor: "#e0f7fa", color: "black"}}
             />
 
             <div className="gestion-form-buttons">
@@ -304,5 +309,3 @@ function GestionMoldes() {
 }
 
 export default GestionMoldes;
-/*aca me quede jeje*/
-

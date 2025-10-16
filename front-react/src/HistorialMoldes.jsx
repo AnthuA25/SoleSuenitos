@@ -16,6 +16,11 @@ function HistorialMoldes() {
 
   const [filtro, setFiltro] = useState("codigo");
   const [busqueda, setBusqueda] = useState("");
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Datos de usuario de prueba
+  const user = { nombre: "Sole Suenito" };
+  const userInicial = user.nombre.charAt(0).toUpperCase();
 
   // Filtrado simple
   const moldesFiltrados = moldes.filter((molde) =>
@@ -96,18 +101,65 @@ function HistorialMoldes() {
             <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
             <li className="active">Historial de Moldes</li>
             <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
-            <li>Historial de Rollos</li>
-            <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
-            <li>Historial de Optimización</li>
+            <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
+            <li onClick={() => navigate("/ordenproduccion")}>Orden de Producción</li>
+            <li onClick={() => navigate("/historialopti")}>Historial de Optimización</li>
           </ul>
-
-          <button className="gestion-logout" onClick={handleLogout}>
-            Cerrar Sesión
-          </button>
         </div>
 
         {/* Contenido */}
         <div className="gestion-content">
+          {/* HEADER superior con usuario */}
+          <div className="gestion-header" style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div className="user-menu-container">
+              <div 
+                className="user-button" 
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+              >
+                <div className="user-circle" style={{
+                  width: "35px",
+                  height: "35px",
+                  borderRadius: "50%",
+                  backgroundColor: "#2f6d6d",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "8px"
+                }}>{userInicial}</div>
+                <span style={{fontWeight: 600, color:"#2f6d6d"}}>{user.nombre}</span>
+              </div>
+              {showUserMenu && (
+                <div className="user-dropdown_sesion" style={{
+                  position: "absolute",
+                  backgroundColor: "#2f6d6d",
+                  border: "1px solid #ccc",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  marginTop: "8px",
+                  right: 0
+                }}>
+                  <button 
+                    className="botoncerrarsesion" 
+                    onClick={handleLogout}
+                    style={{
+                      background: "#2f6d6d",
+                      color: "#fff",
+                      border: "none",
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Título y botón */}
           <div className="historial-header">
             <h1>Historial de Moldes</h1>
             <button className="btn-registrar" onClick={handleRegistrar}>
@@ -121,24 +173,27 @@ function HistorialMoldes() {
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
               className="filtro-select"
+              style={{backgroundColor: "#e0f7fa", color: "black"}}
             >
               <option value="codigo">Código</option>
               <option value="nombre">Nombre</option>
               <option value="version">Versión</option>
               <option value="fecha">Fecha</option>
             </select>
-            <div className="buscar-container">
+            <div className="buscar-container" style={{backgroundColor: "#e0f7fa", color: "black"}}>
               <input
                 type="text"
                 placeholder="Buscar"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
+                style={{backgroundColor: "#e0f7fa", color: "black"}}
               />
               <button><FaSearch /></button>
             </div>
             <button
               className="btn-filtrar"
               onClick={() => setBusqueda("")}
+              style={{backgroundColor: "#ffffffff", color: "black", border: "1px solid #0f836fff"}}
             >
               Resetear
             </button>
@@ -159,11 +214,11 @@ function HistorialMoldes() {
               {moldesFiltrados.length > 0 ? (
                 moldesFiltrados.map((molde) => (
                   <tr key={molde.codigo}>
-                    <td>{molde.codigo}</td>
-                    <td>{molde.nombre}</td>
-                    <td>{molde.version}</td>
-                    <td>{molde.fecha}</td>
-                    <td className="tabla-acciones">
+                    <td style={{color:"gray"}}>{molde.codigo}</td>
+                    <td style={{color:"gray"}}>{molde.nombre}</td>
+                    <td style={{color:"gray"}}>{molde.version}</td>
+                    <td style={{color:"gray"}}>{molde.fecha}</td>
+                    <td className="tabla-acciones" style={{color:"gray"}}>
                       <FaEye
                         className="icono-ver"
                         title="Ver detalles"
@@ -179,7 +234,7 @@ function HistorialMoldes() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center" }}>
+                  <td colSpan="5" style={{ textAlign: "center" , color:"gray"}}>
                     No se encontraron moldes
                   </td>
                 </tr>

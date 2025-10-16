@@ -11,9 +11,15 @@ function RecepcionRollos() {
   const [color, setColor] = useState("");
   const [metraje, setMetraje] = useState("");
   const [proveedor, setProveedor] = useState("");
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // Manejo del formulario
-  const handleGuardar = () => {
+  const user = { nombre: "Sole Suenito" };
+  const userInicial = user.nombre.charAt(0).toUpperCase();
+
+  // Guardar datos localmente
+  const handleGuardar = (e) => {
+    e.preventDefault();
+
     if (!tipoTela || !ancho || !color || !metraje || !proveedor) {
       Swal.fire({
         title: "¡Error!",
@@ -21,14 +27,40 @@ function RecepcionRollos() {
         icon: "error",
         confirmButtonColor: "#2f6d6d",
       });
-    } else {
-      Swal.fire({
-        title: "Registro Guardado",
-        text: "La recepción del rollo se guardó correctamente.",
-        icon: "success",
-        confirmButtonColor: "#2f6d6d",
-      });
+      return;
     }
+
+    const nuevoRollo = {
+      id: Date.now(),
+      tipoTela,
+      ancho,
+      color,
+      metraje,
+      proveedor,
+    };
+
+    // Obtener los rollos existentes del localStorage
+    const rollosGuardados = JSON.parse(localStorage.getItem("rollos")) || [];
+
+    // Agregar el nuevo rollo
+    rollosGuardados.push(nuevoRollo);
+
+    // Guardar de nuevo
+    localStorage.setItem("rollos", JSON.stringify(rollosGuardados));
+
+    Swal.fire({
+      title: "Registro Guardado",
+      text: "La recepción del rollo se guardó correctamente.",
+      icon: "success",
+      confirmButtonColor: "#2f6d6d",
+    });
+
+    // Limpiar campos
+    setTipoTela("");
+    setAncho("");
+    setColor("");
+    setMetraje("");
+    setProveedor("");
   };
 
   const handleLogout = () => {
@@ -62,67 +94,87 @@ function RecepcionRollos() {
             <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
             <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
             <li className="active">Recepción de Rollos</li>
-            <li>Historial de Rollos</li>
-            <li onClick={() => navigate("/ordenproduccion")}>Orden de Produccion</li>
-            <li>Historial de Optimización</li>
+            <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
+            <li onClick={() => navigate("/ordenproduccion")}>Orden de Producción</li>
+            <li onClick={() => navigate("/historialopti")}>Historial de Optimización</li>
           </ul>
-
-          <button className="gestion-logout" onClick={handleLogout}>
-            Cerrar Sesión
-          </button>
         </div>
 
         {/* Contenido */}
         <div className="gestion-content">
+          {/* Header usuario */}
+          <div className="gestion-header">
+            <div
+              className="user-menu-container"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+            >
+              <div className="user-button">
+                <div className="user-circle">{userInicial}</div>
+                <span className="user-name">{user.nombre}</span>
+              </div>
+
+              {showUserMenu && (
+                <div className="user-dropdown_sesion">
+                  <button className="botoncerrarsesion" onClick={handleLogout}>
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           <h1>Recepción de Rollos</h1>
           <h3>Registro de rollo de tela</h3>
 
           <form className="gestion-form">
-            {/* Tipo de tela */}
             <label>Tipo de tela</label>
             <input
               type="text"
               value={tipoTela}
               onChange={(e) => setTipoTela(e.target.value)}
               placeholder="Tipo de tela"
+              style={{ backgroundColor: "#e0f7fa", color: "black" }}
             />
+
             <div className="gestion-ancho-color">
-                <div>
-                    <label>Ancho (mm)</label>
-                    <input
-                    type="text"
-                    value={ancho}
-                    onChange={(e) => setAncho(e.target.value)}
-                    placeholder="Ancho"
-                    />
-                </div>
-                <div>
-                    <label>Color</label>
-                    <input
-                    type="text"
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    placeholder="Color"
-                    />
-                </div>
+              <div>
+                <label>Ancho (mm)</label>
+                <input
+                  type="text"
+                  value={ancho}
+                  onChange={(e) => setAncho(e.target.value)}
+                  placeholder="Ancho"
+                  style={{ backgroundColor: "#e0f7fa", color: "green" }}
+                />
+              </div>
+              <div>
+                <label>Color</label>
+                <input
+                  type="text"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  placeholder="Color"
+                  style={{ backgroundColor: "#e0f7fa", color: "black" }}
+                />
+              </div>
             </div>
 
-            {/* Metraje */}
             <label>Metraje (m)</label>
             <input
               type="text"
               value={metraje}
               onChange={(e) => setMetraje(e.target.value)}
               placeholder="Metraje"
+              style={{ backgroundColor: "#e0f7fa", color: "black" }}
             />
 
-            {/* Proveedor */}
             <label>Proveedor</label>
             <input
               type="text"
               value={proveedor}
               onChange={(e) => setProveedor(e.target.value)}
               placeholder="Proveedor"
+              style={{ backgroundColor: "#e0f7fa", color: "black" }}
             />
 
             <div className="gestion-form-buttons">
@@ -130,7 +182,6 @@ function RecepcionRollos() {
                 className="gestion-cancel-button"
                 onClick={(e) => {
                   e.preventDefault();
-                  // Limpiar campos
                   setTipoTela("");
                   setAncho("");
                   setColor("");
@@ -144,7 +195,7 @@ function RecepcionRollos() {
                 Guardar
               </button>
             </div>
-        </form>
+          </form>
         </div>
       </div>
     </div>
