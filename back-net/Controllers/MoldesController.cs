@@ -142,7 +142,7 @@ namespace back_net.Controllers
             var resultados = await _context.Moldes
                 .Where(m => m.Activo == true &&
                     (
-                        EF.Functions.ILike(m.CodigoMolde, $"%{criterio}%") ||     // PostgreSQL: búsqueda insensible a mayúsculas
+                        EF.Functions.ILike(m.CodigoMolde, $"%{criterio}%") ||  
                         EF.Functions.ILike(m.NombreMolde, $"%{criterio}%")
                     ))
                 .OrderByDescending(m => m.FechaSubida)
