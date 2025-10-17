@@ -147,6 +147,9 @@ public partial class AppDbContext : DbContext
                 .HasDefaultValue(true)
                 .HasColumnName("activo");
             entity.Property(e => e.ArchivoBlob).HasColumnName("archivo_blob");
+            entity.Property(e => e.CodigoMolde)
+                .HasColumnType("character varying")
+                .HasColumnName("codigo_molde");
             entity.Property(e => e.Descripcion).HasColumnName("descripcion");
             entity.Property(e => e.ExtensionArchivo)
                 .HasMaxLength(20)
@@ -162,6 +165,10 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(200)
                 .HasColumnName("nombre_molde");
             entity.Property(e => e.PesoBytes).HasColumnName("peso_bytes");
+            entity.Property(e => e.VersionMolde)
+                .HasMaxLength(10)
+                .HasDefaultValueSql("'v1'::character varying")
+                .HasColumnName("version_molde");
 
             entity.HasOne(d => d.IdUsuarioSubidaNavigation).WithMany(p => p.Moldes)
                 .HasForeignKey(d => d.IdUsuarioSubida)
