@@ -25,6 +25,10 @@ public partial class Molde
 
     public bool? Activo { get; set; }
 
+    public string VersionMolde { get; set; } = null!;
+
+    public string CodigoMolde { get; set; } = null!;
+
     public virtual Usuario? IdUsuarioSubidaNavigation { get; set; }
 
     public virtual ICollection<Optimizacione> Optimizaciones { get; set; } = new List<Optimizacione>();
