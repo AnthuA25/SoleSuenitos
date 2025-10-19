@@ -53,7 +53,7 @@ SoleSuenitos/
 
 ```bash
 git clone <URL-del-repositorio>
-cd <project-name>
+cd <nombre-proyecto>
 ```
 
 ### 2. Backend (.NET 8)
