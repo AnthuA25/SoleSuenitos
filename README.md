@@ -110,3 +110,30 @@ yarn dev
     -   Optimización de corte textil y generación de marcador digital.
     -   Interfaz React responsiva con integración al backend.
     -   Base de datos PostgreSQL con control de versiones de moldes.
+
+
+##  Tecnologías utilizadas
+
+### ⚙️ Backend (.NET)
+- **ASP.NET Core 8** – Framework principal para el desarrollo del API REST.  
+- **Entity Framework Core** – ORM para la gestión y persistencia de datos en PostgreSQL.  
+- **DotNetEnv** – Carga de variables de entorno desde archivo `.env`.  
+- **JWT Authentication** – Sistema de autenticación basado en tokens seguros.  
+- **Swagger / CORS** – Documentación interactiva y control de acceso entre dominios.
+
+---
+
+### 🐍 Motor de Optimización (Python)
+- **FastAPI** – Framework rápido y moderno para la creación de microservicios.  
+- **ezdxf** – Librería para lectura y manipulación de archivos DXF (moldes textiles).  
+- **Shapely** – Cálculos geométricos y de área para optimización de piezas.  
+- **Uvicorn** – Servidor ASGI ligero para ejecutar la aplicación FastAPI.
+
+---
+
+### 💻 Frontend (React)
+- **React 18** – Librería principal para la construcción de la interfaz de usuario.  
+- **Vite** – Entorno de desarrollo rápido y moderno para React.  
+- **Tailwind CSS** – Framework de estilos utilitarios para diseño adaptable.  
+- **Axios** – Cliente HTTP para la comunicación con el backend.  
+- **React Router DOM** – Gestión de rutas y navegación dentro de la aplicación.
