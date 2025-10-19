@@ -152,3 +152,12 @@ yarn dev
 | 🧪 **Tester 2** | [**Samantha Lezma Chuchon**] | 
 
 
+---
+
+## 🎓 Proyecto Académico
+
+Este proyecto fue desarrollado en el curso **Software II** de la  
+**Universidad de San Martín de Porres (USMP)** – Facultad de Ingeniería y Arquitectura,  
+como parte de la formación en **Ingeniería de Computación y Sistemas**.
+
+
