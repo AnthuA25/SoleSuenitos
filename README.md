@@ -44,7 +44,7 @@ SoleSuenitos/
 │   └── vite.config.js
 │
 └── README.md
-
+```
 
 
 ## Instalación y Ejecución
@@ -76,3 +76,37 @@ Ejecutar servidor
 dotnet run
 ```
 
+### 3. Motor de Optimización (Python)
+
+Instalar dependencias
+```bash
+cd motor-optimization
+pip install -r requirements.txt
+```
+
+Ejecutar servidor
+```bash
+uvicorn app:app --reload 
+```
+
+### 4. Frontend (React)
+
+Instalar dependencias
+```bash
+cd frontend
+yarn
+```
+
+Ejecutar entorno local
+```bash
+yarn dev
+```
+
+##  Funcionalidades principales
+
+    -   Autenticación JWT con roles: Logística, Operario de Corte, Inspector de Calidad.
+    -   Gestión de Moldes: registrar, listar, buscar y eliminar moldes.
+    -   Lectura de archivos DXF con cálculo geométrico (área, dimensiones, orientación).
+    -   Optimización de corte textil y generación de marcador digital.
+    -   Interfaz React responsiva con integración al backend.
+    -   Base de datos PostgreSQL con control de versiones de moldes.
