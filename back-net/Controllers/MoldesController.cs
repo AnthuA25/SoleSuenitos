@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using back_net.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace back_net.Controllers
 {
@@ -17,6 +19,7 @@ namespace back_net.Controllers
 
         // Registrar molde -> POST: api/moldes/registrar
         [HttpPost("registrar")]
+        [Authorize(Policy = "SoloLogistica")]
         public async Task<IActionResult> RegistrarMolde([FromForm] IFormFile archivo, [FromForm] string nombreMolde)
         {
             if (archivo == null || archivo.Length == 0)
@@ -24,6 +27,9 @@ namespace back_net.Controllers
 
             if (string.IsNullOrEmpty(nombreMolde))
                 return BadRequest(new { message = "Debe ingresar el nombre del molde." });
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            int? idUsuario = userIdClaim != null ? int.Parse(userIdClaim.Value) : (int?)null;
 
             // Leer archivo como bytes
             using var ms = new MemoryStream();
@@ -53,7 +59,8 @@ namespace back_net.Controllers
                 PesoBytes = archivo.Length,
                 VersionMolde = "v1",
                 FechaSubida = DateTime.UtcNow,
-                Activo = true
+                Activo = true,
+                IdUsuarioSubida = idUsuario
             };
 
             _context.Moldes.Add(molde);
@@ -68,7 +75,8 @@ namespace back_net.Controllers
                 molde.ExtensionArchivo,
                 molde.PesoBytes,
                 molde.VersionMolde,
-                molde.FechaSubida
+                molde.FechaSubida,
+                molde.IdUsuarioSubida
             });
         }
 
@@ -78,6 +86,7 @@ namespace back_net.Controllers
         {
             var moldes = await _context.Moldes
                 .Where(m => m.Activo == true)
+                .Include(m => m.IdUsuarioSubidaNavigation)
                 .OrderByDescending(m => m.FechaSubida)
                 .Select(m => new
                 {
@@ -86,7 +95,11 @@ namespace back_net.Controllers
                     m.NombreMolde,
                     m.VersionMolde,
                     m.FechaSubida,
-                    m.NombreArchivoOriginal
+                    m.NombreArchivoOriginal,
+                    UsuarioSubida = m.IdUsuarioSubidaNavigation != null
+                ? m.IdUsuarioSubidaNavigation.NombreCompleto
+                : "Desconocido"
+
                 })
                 .ToListAsync();
 
@@ -142,7 +155,7 @@ namespace back_net.Controllers
             var resultados = await _context.Moldes
                 .Where(m => m.Activo == true &&
                     (
-                        EF.Functions.ILike(m.CodigoMolde, $"%{criterio}%") ||  
+                        EF.Functions.ILike(m.CodigoMolde, $"%{criterio}%") ||
                         EF.Functions.ILike(m.NombreMolde, $"%{criterio}%")
                     ))
                 .OrderByDescending(m => m.FechaSubida)
