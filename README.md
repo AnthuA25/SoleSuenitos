@@ -13,7 +13,7 @@ El sistema está conformado por tres módulos principales que trabajan de forma 
 |:-------|:------------|:-------------|
 | **Backend Principal (.NET 8)** | ASP.NET Core · Entity Framework Core · JWT | Administra usuarios, roles, moldes, autenticación, políticas de autorización y conexión a base de datos. |
 | **Motor de Optimización (Python)** | FastAPI · ezdxf · Shapely | Analiza archivos DXF, calcula áreas, orientaciones y genera marcadores digitales optimizados. |
-| **Frontend (React)** | React + Vite · TailwindCSS | Interfaz visual moderna para cargar moldes, visualizar resultados y gestionar procesos de producción. |
+| **Frontend (React)** | React + Vite | Interfaz visual moderna para cargar moldes, visualizar resultados y gestionar procesos de producción. |
 
 ---
 
@@ -44,4 +44,35 @@ SoleSuenitos/
 │   └── vite.config.js
 │
 └── README.md
+
+
+
+## Instalación y Ejecución
+
+### 1. Clonar el repositorio
+
+```bash
+git clone <URL-del-repositorio>
+cd <project-name>
+```
+
+### 2. Backend (.NET 8)
+
+Instalar dependencias
+```bash
+cd back-net
+dotnet restore
+```
+
+Crear archivo .env
+```bash
+DATABASE_URL=
+JWT_SECRET=
+```
+
+
+Ejecutar servidor
+```bash
+dotnet run
+```
 
