@@ -143,12 +143,12 @@ yarn dev
 | Rol | Integrante | 
 |:----|:------------|
 | 🎨 **Diseño UI/UX & Frontend Developer 1** | [**Aylin Santa Cruz Vargas**](https://github.com/AnthuA25)
-| 👩‍💻 **Frontend Developer 1** | [Nombre] |
-| 👨‍💻 **Frontend Developer 2** | [Nombre] |
-| 🧠 **Backend Developer 1** | [Nombre] | 
-| ⚙️ **Backend Developer 2** | [Nombre] |
-| 🧮 **Administrador del Sistema** | [Nombre] | 
-| 🧪 **Tester 1** | [Nombre] | 
-| 🧪 **Tester 2** | [Nombre] | 
+| 👩‍💻 **Frontend Developer 1** | [**Matias León Pastuso**] |
+| 👨‍💻 **Frontend Developer 2** | [**Ethan Cusi Chavez**] |
+| 🧠 **Backend Developer 1** | [**Aylin Santa Cruz Vargas**] | 
+| ⚙️ **Backend Developer 2** | [**Renzo Lopez Bazan**] |
+| 🧮 **Administrador del Sistema** | [**Josmer Jauregui Caceres**] | 
+| 🧪 **Tester 1** | [**Jose Villegas Mamani**] | 
+| 🧪 **Tester 2** | [**Samantha Lezma Chuchon**] | 
 
 
