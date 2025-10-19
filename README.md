@@ -140,13 +140,9 @@ yarn dev
 
 ## 👥 Equipo de Desarrollo
 
-| Rol | Integrante | Responsabilidades |
-|:----|:------------|:------------------|
-## 👥 Equipo de Desarrollo
-
-| Rol | Integrante | Responsabilidades |
-|:----|:------------|:------------------|
-| 🎨 **Diseño UI/UX & Frontend Developer 1** | [**Aylin Santa Cruz Vargas**]([https://www.linkedin.com/in/aylinsantacruzvargas](https://github.com/AnthuA25))
+| Rol | Integrante | 
+|:----|:------------|
+| 🎨 **Diseño UI/UX & Frontend Developer 1** | [**Aylin Santa Cruz Vargas**](https://github.com/AnthuA25)
 | 👩‍💻 **Frontend Developer 1** | [Nombre] |
 | 👨‍💻 **Frontend Developer 2** | [Nombre] |
 | 🧠 **Backend Developer 1** | [Nombre] | 
