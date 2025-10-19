@@ -137,3 +137,22 @@ yarn dev
 - **Tailwind CSS** – Framework de estilos utilitarios para diseño adaptable.  
 - **Axios** – Cliente HTTP para la comunicación con el backend.  
 - **React Router DOM** – Gestión de rutas y navegación dentro de la aplicación.
+
+## 👥 Equipo de Desarrollo
+
+| Rol | Integrante | Responsabilidades |
+|:----|:------------|:------------------|
+## 👥 Equipo de Desarrollo
+
+| Rol | Integrante | Responsabilidades |
+|:----|:------------|:------------------|
+| 🎨 **Diseño UI/UX & Frontend Developer 1** | [**Aylin Santa Cruz Vargas**]([https://www.linkedin.com/in/aylinsantacruzvargas](https://github.com/AnthuA25))
+| 👩‍💻 **Frontend Developer 1** | [Nombre] |
+| 👨‍💻 **Frontend Developer 2** | [Nombre] |
+| 🧠 **Backend Developer 1** | [Nombre] | 
+| ⚙️ **Backend Developer 2** | [Nombre] |
+| 🧮 **Administrador del Sistema** | [Nombre] | 
+| 🧪 **Tester 1** | [Nombre] | 
+| 🧪 **Tester 2** | [Nombre] | 
+
+
