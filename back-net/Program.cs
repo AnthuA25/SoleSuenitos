@@ -1,28 +1,26 @@
-using back_net.Models;
-using Microsoft.EntityFrameworkCore;
-using DotNetEnv; 
+using back_net.Configurations;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Cargar variables desde .env
-Env.Load();
 
-// Obtener cadena de conexión
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new Exception("No se encontró la variable de entorno DATABASE_URL. Verifica tu archivo .env");
-}
-
-// Registrar DbContext
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+// Configuración modular
+builder.Services.AddDatabase();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddRolePolicies();
 
 // controladores
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
 
 var app = builder.Build();
 
@@ -34,12 +32,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.MapControllers();
 
-app.UseCors(builder =>
-    builder.AllowAnyOrigin()
-           .AllowAnyMethod()
-           .AllowAnyHeader());
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 
 
 app.Run();
