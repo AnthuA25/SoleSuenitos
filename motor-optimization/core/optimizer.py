@@ -1,38 +1,56 @@
-import random
+from shapely.geometry import Polygon
 
-def shelf_pack(piezas, ancho_rollo, largo_rollo, spacing=10):
+def shelf_pack(piezas, ancho_rollo_mm, largo_rollo_mm, spacing=10):
     colocadas = []
-    x, y, max_alto = 0, 0, 0
+    x, y = 0, 0
+    fila_altura = 0
+    total_area = 0
 
     for pieza in piezas:
-        ancho = pieza["ancho_mm"]
-        alto = pieza["alto_mm"]
+        w = pieza["ancho_mm"]
+        h = pieza["alto_mm"]
 
-        if x + ancho > ancho_rollo:
+        if w > ancho_rollo_mm or h > largo_rollo_mm:
+            print(f"⚠️ {pieza['nombre']} es demasiado grande para el rollo.")
+            continue
+
+        # Salto de línea si no cabe en la fila
+        if x + w > ancho_rollo_mm:
             x = 0
-            y += max_alto + spacing
-            max_alto = 0
+            y += fila_altura + spacing
+            fila_altura = 0
 
-        if y + alto > largo_rollo:
-            raise ValueError("Se excedió el largo del rollo con la heurística actual.")
+        # Si ya no cabe en el largo del rollo, termina
+        if y + h > largo_rollo_mm:
+            print(f"⚠️ {pieza['nombre']} no cabe en el largo del rollo.")
+            break
 
-        pieza_colocada = pieza.copy()
-        pieza_colocada["pos_x"] = x + random.uniform(0, 5)
-        pieza_colocada["pos_y"] = y + random.uniform(0, 5)
-        colocadas.append(pieza_colocada)
+        poly = Polygon([
+            (x, y),
+            (x + w, y),
+            (x + w, y + h),
+            (x, y + h)
+        ])
 
-        x += ancho + spacing
-        max_alto = max(max_alto, alto)
+        colocadas.append({
+            "nombre": pieza["nombre"],
+            "poligono": poly
+        })
 
-    total_area = sum(p["area_mm2"] for p in piezas)
-    area_rollo = ancho_rollo * largo_rollo
-    aprovechamiento = total_area / area_rollo * 100
-    desperdicio = 100 - aprovechamiento
+        x += w + spacing
+        fila_altura = max(fila_altura, h)
+        total_area += w * h
 
+    if not colocadas:
+        raise ValueError("❌ No se pudieron colocar piezas. Revisa las unidades o el tamaño del rollo.")
+
+    rollo_area = ancho_rollo_mm * largo_rollo_mm
     kpis = {
-        "tela_utilizada_mm2": total_area,
-        "aprovechamiento_%": round(aprovechamiento, 2),
-        "desperdicio_%": round(desperdicio, 2)
+        "total_piezas": len(colocadas),
+        "area_tela": rollo_area,
+        "area_utilizada": total_area,
+        "aprovechamiento_%": round((total_area / rollo_area) * 100, 2),
+        "desperdicio_%": round(100 - (total_area / rollo_area) * 100, 2)
     }
 
     return colocadas, kpis
