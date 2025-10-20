@@ -17,7 +17,7 @@ def draw_marker_from_dxf(piezas, ancho_rollo, largo_rollo, out_png):
     validas = [p for p in piezas if p.get("puntos") and len(p["puntos"]) >= 3]
 
     if not validas:
-        raise ValueError("❌ No hay piezas válidas para dibujar el marcador.")
+        raise ValueError("No hay piezas válidas para dibujar el marcador.")
 
     # --- Cálculo de límites de las piezas ---
     min_x = min(min(pt[0] for pt in p["puntos"]) for p in validas)

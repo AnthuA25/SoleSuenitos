@@ -11,7 +11,7 @@ def shelf_pack(piezas, ancho_rollo_mm, largo_rollo_mm, spacing=10):
         h = pieza["alto_mm"]
 
         if w > ancho_rollo_mm or h > largo_rollo_mm:
-            print(f"⚠️ {pieza['nombre']} es demasiado grande para el rollo.")
+            print(f"{pieza['nombre']} es demasiado grande para el rollo.")
             continue
 
         # Salto de línea si no cabe en la fila
@@ -22,7 +22,7 @@ def shelf_pack(piezas, ancho_rollo_mm, largo_rollo_mm, spacing=10):
 
         # Si ya no cabe en el largo del rollo, termina
         if y + h > largo_rollo_mm:
-            print(f"⚠️ {pieza['nombre']} no cabe en el largo del rollo.")
+            print(f"{pieza['nombre']} no cabe en el largo del rollo.")
             break
 
         poly = Polygon([
@@ -42,7 +42,7 @@ def shelf_pack(piezas, ancho_rollo_mm, largo_rollo_mm, spacing=10):
         total_area += w * h
 
     if not colocadas:
-        raise ValueError("❌ No se pudieron colocar piezas. Revisa las unidades o el tamaño del rollo.")
+        raise ValueError("No se pudieron colocar piezas. Revisa las unidades o el tamaño del rollo.")
 
     rollo_area = ancho_rollo_mm * largo_rollo_mm
     kpis = {

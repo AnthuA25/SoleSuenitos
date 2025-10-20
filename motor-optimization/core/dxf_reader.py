@@ -57,7 +57,7 @@ def leer_dxf(path):
             })
 
         except Exception as ex:
-            print(f"⚠️ Error leyendo entidad DXF: {ex}")
+            print(f"Error leyendo entidad DXF: {ex}")
             continue
 
     # 🔹 Agrupar repeticiones

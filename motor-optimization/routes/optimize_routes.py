@@ -29,7 +29,7 @@ async def optimize(
     draw_marker(colocadas, ancho_rollo_mm, largo_rollo_mm, out_png)
 
     return {
-        "mensaje": "✅ Marcador generado correctamente.",
+        "mensaje": "Marcador generado correctamente.",
         "kpis": kpis,
         "imagen": out_png
     }
