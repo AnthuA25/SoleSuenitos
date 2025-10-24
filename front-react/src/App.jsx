@@ -1,13 +1,13 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./Login.jsx";
-import GestionMoldes from "./GestionMoldes.jsx";
-import HistorialMoldes from "./HistorialMoldes.jsx";
+import Login from "./pages/Login/Login.jsx";
+import GestionMoldes from "./pages/Moldes/GestionMoldes.jsx";
 import RecepcionRollos from "./RecepcionRollos.jsx";
 import HistorialRollos from "./HistorialRollos.jsx";
 import OrdenProduccion from "./OrdenProduccion.jsx";
 import './css/Global.css' 
 import HistorialOptimizaciones from "./HistorialOptimizaciones.jsx";
+import HistorialMoldes from "./pages/Moldes/HistorialMoldes.jsx";
 
 
 
@@ -34,7 +34,7 @@ function App() {
         <Route path="/ordenproduccion" element={<OrdenProduccion />} />
 
       {/*vista de Optimizacionv1*/}
-        <Route path="/optimizacion" element={<Optimizacion />} />   
+        {/* <Route path="/optimizacion" element={<Optimizacion />} />    */}
 
       {/*vista de Historial de Optimizacion*/}
         <Route path="/historialopti" element={<HistorialOptimizaciones />} />
