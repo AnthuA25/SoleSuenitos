@@ -1,22 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
 import SidebarMenu from "../../components/SliderMenu";
 import { registrarMolde } from "../../api/moldeService";
+import UserHeader from "../../components/UserHeader";
 
 function GestionMoldes() {
   const [file, setFile] = useState(null);
   const [nombreMolde, setNombreMolde] = useState("");
   const [isDragging, setIsDragging] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-
-  const navigate = useNavigate();
-
-  // Datos de usuario de prueba
-  const user = { nombre: "Sole Suenito" };
-  const userInicial = user.nombre.charAt(0).toUpperCase();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -192,31 +185,6 @@ function GestionMoldes() {
     }
   };
 
-  const handleLogout = () => {
-    Swal.fire({
-      title: "¿Cerrar sesión?",
-      text: "¿Estás seguro de que quieres salir del sistema?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#2f6d6d",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, cerrar sesión",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: "Sesión cerrada",
-          text: "Has cerrado sesión correctamente",
-          icon: "success",
-          confirmButtonColor: "#2f6d6d",
-          timer: 2000,
-          showConfirmButton: false,
-        }).then(() => {
-          navigate("/");
-        });
-      }
-    });
-  };
 
   return (
     <div className="gestion-container">
@@ -238,22 +206,7 @@ function GestionMoldes() {
         <div className="gestion-content">
           {/* HEADER superior */}
           <div className="gestion-header">
-            <div className="user-menu-container">
-              <div
-                className="user-button"
-                onClick={() => setShowUserMenu(!showUserMenu)}
-              >
-                <div className="user-circle">{userInicial}</div>
-                <span className="user-name">{user.nombre}</span>
-              </div>
-              {showUserMenu && (
-                <div className="user-dropdown_sesion">
-                  <button className="botoncerrarsesion" onClick={handleLogout}>
-                    Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </div>
+            <UserHeader nombreUsuario="Sole Sueñitos" />
           </div>
 
           <h1>Gestión de moldes</h1>

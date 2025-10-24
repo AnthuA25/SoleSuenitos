@@ -16,12 +16,7 @@ function HistorialMoldes() {
   const [moldes, setMoldes] = useState([]);
   const [filtro, setFiltro] = useState("codigoMolde");
   const [busqueda, setBusqueda] = useState("");
-  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const user = { nombre: "Sole Sueñitos" };
-  const userInicial = user.nombre.charAt(0).toUpperCase();
-
-  // 🔹 Cargar moldes al inicio
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -39,7 +34,7 @@ function HistorialMoldes() {
     fetchData();
   }, []);
 
-  // 🔍 Buscar moldes en el backend
+
   const handleBuscar = async () => {
     if (!busqueda.trim()) {
       const data = await listarMoldes();
@@ -61,7 +56,6 @@ function HistorialMoldes() {
     }
   };
 
-  // 👁️ Ver detalles
   const handleVer = async (molde) => {
     try {
       const detalle = await obtenerMoldePorId(molde.idMolde);
@@ -89,7 +83,7 @@ function HistorialMoldes() {
     }
   };
 
-  // 🗑️ Eliminar molde
+
   const handleEliminar = async (idMolde) => {
     const confirm = await Swal.fire({
       title: "¿Eliminar molde?",
@@ -127,20 +121,6 @@ function HistorialMoldes() {
 
   const handleRegistrar = () => navigate("/moldes");
 
-  const handleLogout = () => {
-    Swal.fire({
-      title: "¿Cerrar sesión?",
-      text: "¿Deseas salir del sistema?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#2f6d6d",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, cerrar sesión",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) navigate("/");
-    });
-  };
 
   return (
     <div className="gestion-container">
