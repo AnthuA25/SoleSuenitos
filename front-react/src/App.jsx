@@ -2,12 +2,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login/Login.jsx";
 import GestionMoldes from "./pages/Moldes/GestionMoldes.jsx";
-import RecepcionRollos from "./RecepcionRollos.jsx";
-import HistorialRollos from "./HistorialRollos.jsx";
-import OrdenProduccion from "./OrdenProduccion.jsx";
-import './css/Global.css' 
-import HistorialOptimizaciones from "./HistorialOptimizaciones.jsx";
 import HistorialMoldes from "./pages/Moldes/HistorialMoldes.jsx";
+import RecepcionRollos from "./pages/Rollos/RecepcionRollos.jsx";
+import HistorialRollos from "./pages/Rollos/HistorialRollos.jsx";
+import OrdenProduccion from "./pages/Optimizacion/OrdenProduccion.jsx";
+import HistorialOptimizaciones from "./pages/Optimizacion/HistorialOptimizaciones.jsx";
+import './css/Global.css' 
 
 
 

@@ -10,6 +10,7 @@ import {
   obtenerMoldePorId,
   buscarMoldes,
 } from "../../api/moldeService";
+import SidebarMenu from "../../components/SliderMenu";
 
 function HistorialMoldes() {
   const navigate = useNavigate();
@@ -134,22 +135,7 @@ function HistorialMoldes() {
             </div>
           </div>
 
-          <ul>
-            <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
-            <li className="active">Historial de Moldes</li>
-            <li onClick={() => navigate("/recepcionrollos")}>
-              Recepción de Rollos
-            </li>
-            <li onClick={() => navigate("/historialrollos")}>
-              Historial de Rollos
-            </li>
-            <li onClick={() => navigate("/ordenproduccion")}>
-              Orden de Producción
-            </li>
-            <li onClick={() => navigate("/historialopti")}>
-              Historial de Optimización
-            </li>
-          </ul>
+          <SidebarMenu />
         </div>
 
         {/* Contenido principal */}
@@ -161,13 +147,13 @@ function HistorialMoldes() {
             </button>
           </div>
 
-          {/* 🔍 Filtros */}
+          {/* Filtros */}
           <div className="historial-filtros">
             <select
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
               className="filtro-select"
-              style={{ backgroundColor: "#e0f7fa", color: "black" }}
+              style={{ backgroundColor: "transparent", color: "black" }}
             >
               <option value="codigoMolde">Código</option>
               <option value="nombreMolde">Nombre</option>
@@ -176,7 +162,7 @@ function HistorialMoldes() {
 
             <div
               className="buscar-container"
-              style={{ backgroundColor: "#e0f7fa" }}
+              style={{ backgroundColor: "transparent" }}
             >
               <input
                 type="text"
@@ -184,16 +170,16 @@ function HistorialMoldes() {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleBuscar()}
-                style={{ backgroundColor: "#e0f7fa", color: "black" }}
+                style={{ backgroundColor: "transparent", color: "black" }}
               />
               <button onClick={handleBuscar}>
                 <FaSearch />
               </button>
             </div>
 
-            {/* 🔁 Resetear */}
+            {/* Resetear */}
             <button
-              className="btn-filtrar"
+              className="btn-filtrar-molde"
               onClick={async () => {
                 try {
                   setBusqueda("");
