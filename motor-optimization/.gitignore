@@ -1,4 +1,0 @@
-# --- Entorno virtual ---
-venv/
-.env/
-__pycache__/
