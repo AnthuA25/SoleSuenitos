@@ -17,7 +17,7 @@ function SidebarMenu() {
     <ul>
       {rol === "Encargado de Logistica" && (
         <>
-          <li onClick={() => navigate("/gestionmoldes")}>
+          <li onClick={() => navigate("/moldes")}>
             Gestión de Moldes
           </li>
           <li onClick={() => navigate("/historialmoldes")}>
