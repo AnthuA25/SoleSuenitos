@@ -17,11 +17,24 @@ function SidebarMenu() {
     <ul>
       {rol === "Encargado de Logistica" && (
         <>
-          <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
-          <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
-          <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
-          <li onClick={() => navigate("/ordenproduccion")}>Orden de Producción</li>
-          <li onClick={() => navigate("/historialopti")}>Historial de Optimización</li>
+          <li onClick={() => navigate("/gestionmoldes")}>
+            Gestión de Moldes
+          </li>
+          <li onClick={() => navigate("/historialmoldes")}>
+            Historial de Moldes
+          </li>
+          <li onClick={() => navigate("/recepcionrollos")}>
+            Recepción de Rollos
+          </li>
+          <li onClick={() => navigate("/historialrollos")}>
+            Historial de Rollos
+          </li>
+          <li onClick={() => navigate("/ordenproduccion")}>
+            Orden de Producción
+          </li>
+          <li onClick={() => navigate("/historialopti")}>
+            Historial de Optimización
+          </li>
         </>
       )}
 
