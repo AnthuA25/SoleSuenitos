@@ -1,0 +1,65 @@
+/* Ajuste para el widget de usuario */
+.user-menu-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* Estilos existentes del widget */
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.user-circle {
+  background-color: #2f6d6d;
+  color: white;
+  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-name {
+  color: #2f6d6d;
+  font-weight: 600;
+}
+
+/* Dropdown */
+.user-dropdown_sesion {
+  position: absolute;
+  top: 46px; /* debajo del botón */
+  right: 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #255a5a;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  min-width: 100px; /* reduce el ancho del cuadro */
+  padding: 6px 8px; /* reduce el padding */
+  font-size: 14px; /* tamaño de letra más pequeño */
+  border-radius: 6px; /* bordes un poco más pequeños */
+}
+
+.botoncerrarsesion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  padding: 10px 0;
+  background-color: #255a5a;
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  white-space: nowrap; /* evita salto de línea */
+}

@@ -28,6 +28,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      align-items: center;
     }
 
     .gestion-sidebar h2 {
@@ -50,7 +51,9 @@
 
     .gestion-sidebar li {
       padding: 15px 12px;
-      margin-bottom: 8px;
+      width: 250px;
+      text-align: center;
+      margin-bottom: 15px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 15px;
@@ -59,7 +62,7 @@
 
     .gestion-sidebar li:hover,
     .gestion-sidebar li.active {
-      background-color: #2f6d6d;
+      background-color: #567e7e;
     }
 
     .gestion-logout {
@@ -1048,57 +1051,3 @@
     margin-bottom: 20px;       /* Separación del título */
     position: relative;
   }
-
-  /* Ajuste para el widget de usuario */
-  .user-menu-container {
-    position: relative; /* para que el dropdown se posicione respecto a este contenedor */
-  }
-
-  /* Estilos existentes del widget */
-  .user-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-  }
-
-  .user-circle {
-    width: 32px;
-    height: 32px;
-    background-color: #2f6d6d;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-  }
-
-  .user-name {
-    color: #2f6d6d;
-    font-weight: 600;
-  }
-
-  /* Dropdown */
-  .user-dropdown_sesion {
-    position: absolute;
-    top: 40px; /* debajo del botón */
-    right: 0;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color:#255a5a ;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    z-index: 10;
-    min-width: 100px;      /* reduce el ancho del cuadro */
-    padding: 6px 8px;      /* reduce el padding */
-    font-size: 14px;       /* tamaño de letra más pequeño */
-    border-radius: 6px;    /* bordes un poco más pequeños */
-  }
-
-  .botoncerrarsesion{
-    background-color: #255a5a;
-    color: white;
-      padding: 4px 8px;      /* reduce el tamaño del botón */
-    font-size: 14px;   
-  }
-
