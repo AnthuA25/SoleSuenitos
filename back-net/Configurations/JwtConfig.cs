@@ -13,7 +13,7 @@ namespace back_net.Configurations
             if (string.IsNullOrEmpty(jwtSecret))
                 throw new Exception("JWT_SECRET no está definido en .env");
 
-            var key = Encoding.ASCII.GetBytes(jwtSecret);
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
 
             services.AddAuthentication(options =>
             {
@@ -29,8 +29,21 @@ namespace back_net.Configurations
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    IssuerSigningKey = key,
                     ClockSkew = TimeSpan.Zero
+                };
+                
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        // Si existe la cookie AuthToken, úsala como token JWT
+                        if (context.Request.Cookies.ContainsKey("AuthToken"))
+                        {
+                            context.Token = context.Request.Cookies["AuthToken"];
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
         }

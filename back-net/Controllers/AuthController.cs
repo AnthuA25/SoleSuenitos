@@ -43,6 +43,14 @@ namespace back_net.Controllers
             // Generar token JWT con rol incluido
             var token = GenerarJwtToken(usuario);
 
+            Response.Cookies.Append("AuthToken", token, new CookieOptions
+            {
+                HttpOnly = true,        
+                Secure = true,          
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddHours(8)
+            });
+
             // Actualizar último acceso
             usuario.UltimoAcceso = DateTime.UtcNow;
             await _context.SaveChangesAsync();
@@ -57,8 +65,7 @@ namespace back_net.Controllers
                     usuario.Correo,
                     Rol = usuario.IdRoleNavigation.NombreRole,
                     usuario.UltimoAcceso
-                },
-                token
+                }
             });
         }
 
@@ -168,6 +175,6 @@ namespace back_net.Controllers
         public string NombreCompleto { get; set; } = string.Empty;
         public string Correo { get; set; } = string.Empty;
         public string Contrasena { get; set; } = string.Empty;
-        public int IdRole { get; set; } 
+        public int IdRole { get; set; }
     }
 }
