@@ -82,6 +82,7 @@ namespace back_net.Controllers
 
         // Listar moldes -> GET: api/moldes/listar
         [HttpGet("listar")]
+        [Authorize(Policy = "SoloLogistica")]
         public async Task<IActionResult> ListarMoldes()
         {
             var moldes = await _context.Moldes
@@ -129,6 +130,7 @@ namespace back_net.Controllers
         }
         // Eliminar molde (lógico) -> DELETE: api/moldes/{id}
         [HttpDelete("{id}")]
+        [Authorize(Policy = "SoloLogistica")]
         public async Task<IActionResult> EliminarMolde(int id)
         {
             var molde = await _context.Moldes.FindAsync(id);
@@ -143,6 +145,7 @@ namespace back_net.Controllers
 
         // Buscar moldes -> GET: api/moldes/buscar?criterio=xxx
         [HttpGet("buscar")]
+        [Authorize(Policy = "SoloLogistica")]
         public async Task<IActionResult> BuscarMoldes([FromQuery] string criterio)
         {
             // Validación básica
