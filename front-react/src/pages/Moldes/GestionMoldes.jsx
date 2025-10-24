@@ -250,7 +250,7 @@ function GestionMoldes() {
               value={nombreMolde}
               onChange={(e) => setNombreMolde(e.target.value)}
               placeholder="Ej: Molde Pantalón"
-              style={{ backgroundColor: "#e0f7fa", color: "black" }}
+              style={{ backgroundColor: "transparent", color: "black" }}
             />
 
             <div className="gestion-form-buttons">
