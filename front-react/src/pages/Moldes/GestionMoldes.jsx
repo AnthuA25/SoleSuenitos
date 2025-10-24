@@ -143,7 +143,6 @@ function GestionMoldes() {
     if (!confirm.isConfirmed) return;
 
     try {
-      // 🔥 Aquí se hace la llamada real al backend
       const response = await registrarMolde(file, nombreMolde);
 
       Swal.fire({
