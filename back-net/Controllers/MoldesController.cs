@@ -109,6 +109,7 @@ namespace back_net.Controllers
 
         // Obtener detalle de un molde -> GET: api/moldes/{id}
         [HttpGet("{id}")]
+        [Authorize(Policy = "SoloLogistica")]
         public async Task<IActionResult> ObtenerMolde(int id)
         {
             var molde = await _context.Moldes.FindAsync(id);
