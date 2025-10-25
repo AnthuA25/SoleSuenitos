@@ -377,9 +377,8 @@
   color: #333;
 }
 
-.tabla-acciones {
-  display: flex;
-  gap: 10px;
+.tabla-acciones .icono-ver{
+  margin-right: 20px
 }
 
 .icono-ver,
