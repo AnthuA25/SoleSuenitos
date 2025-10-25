@@ -36,18 +36,23 @@ export const obtenerRolloPorId = async (id) => {
   }
 };
 
-export const buscarRolloPorCodigo = async (criterio) => {
+export const filtrarRollos = async (campo, criterio, estado) => {
   try {
-    const response = await api.get(`/rollos/buscar?criterio=${encodeURIComponent(criterio)}`, {
+    const params = new URLSearchParams();
+    if (campo) params.append("campo", campo);
+    if (criterio) params.append("criterio", criterio);
+    if (estado) params.append("estado", estado);
+
+    const response = await api.get(`/rollos/filtrar?${params.toString()}`, {
       withCredentials: true,
     });
     return response.data;
   } catch (error) {
-    if (error.response?.status === 404) return []; 
-    console.error("Error en buscarRollos:", error);
-    throw error.response ? error.response.data : { message: "Error desconocido" };
+    console.error("Error en filtrarRollos:", error);
+    throw error.response?.data || { message: "Error desconocido" };
   }
 };
+
 
 export const editarRollo = async (id, payload) => {
   try {
