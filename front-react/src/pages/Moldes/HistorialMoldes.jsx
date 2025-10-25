@@ -11,6 +11,7 @@ import {
   buscarMoldes,
 } from "../../api/moldeService";
 import SidebarMenu from "../../components/SliderMenu";
+import UserHeader from "../../components/UserHeader";
 
 function HistorialMoldes() {
   const navigate = useNavigate();
@@ -139,14 +140,13 @@ function HistorialMoldes() {
         </div>
 
         {/* Contenido principal */}
-        <div className="gestion-content">
-          <div className="historial-header">
-            <h1>Historial de Moldes</h1>
-            <button className="btn-registrar" onClick={handleRegistrar}>
-              <FaPlus /> Registrar molde
-            </button>
+        <div className="gestion-contenttt">
+          {/* HEADER superior */}
+          <div className="gestion-header" style={{marginTop:"-60px"}}>
+            <UserHeader nombreUsuario="Sole Sueñitos" />
           </div>
 
+          <h1>Historial de moldes</h1>
           {/* Filtros */}
           <div className="historial-filtros">
             <select
@@ -183,7 +183,7 @@ function HistorialMoldes() {
               onClick={async () => {
                 try {
                   setBusqueda("");
-                  const data = await listarMoldes(); // 🔁 vuelve a traer todos los moldes
+                  const data = await listarMoldes(); 
                   setMoldes(data);
                 } catch (error) {
                   Swal.fire({

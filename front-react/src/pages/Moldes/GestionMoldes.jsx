@@ -203,7 +203,7 @@ function GestionMoldes() {
         </div>
 
         {/* CONTENIDO */}
-        <div className="gestion-content">
+        <div className="gestion-contentt">
           {/* HEADER superior */}
           <div className="gestion-header">
             <UserHeader nombreUsuario="Sole Sueñitos" />

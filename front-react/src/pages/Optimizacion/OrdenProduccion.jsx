@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
+import UserHeader from "../../components/UserHeader";
 
 function OrdenProduccion() {
   const navigate = useNavigate();
@@ -407,11 +408,11 @@ function OrdenProduccion() {
         <div className="gestion-content">
           {/* HEADER superior */}
           <div className="gestion-header">
-            <div className="user-menu-container">
-              <div className="user-button" onClick={() => setShowUserMenu(!showUserMenu)}>
-                <div className="user-circle">{userInicial}</div>
-                <div className="user-name">{user.nombre}</div>
-              </div>
+            <div>
+                {/* HEADER superior */}
+          <div className="gestion-header">
+            <UserHeader nombreUsuario="Sole Sueñitos" />
+          </div>
 
               {showUserMenu && (
                 <div className="user-dropdown_sesion">
