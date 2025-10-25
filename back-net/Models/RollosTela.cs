@@ -7,7 +7,7 @@ public partial class RollosTela
 {
     public int IdRollo { get; set; }
 
-    public string? CodigoRollo { get; set; }
+    public string CodigoRollo { get; set; } = null!;
 
     public string TipoTela { get; set; } = null!;
 
