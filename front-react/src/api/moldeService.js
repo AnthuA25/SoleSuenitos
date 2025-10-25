@@ -15,7 +15,7 @@ export const registrarMolde = async (archivo, nombreMolde) => {
     });
     return response.data;
   } catch (error) {
-    console.error("❌ Error en registrarMolde:", error);
+    console.error("Error en registrarMolde:", error);
     throw error.response ? error.response.data : { message: "Error desconocido" };
   }
 };
