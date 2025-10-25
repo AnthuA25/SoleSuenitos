@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
+import UserHeader from "../../components/UserHeader";
 
 function HistorialOptimizaciones() {
   const navigate = useNavigate();
@@ -135,25 +136,10 @@ function HistorialOptimizaciones() {
         <div className="gestion-content">
           {/* HEADER SUPERIOR CON USUARIO */}
           <div className="gestion-header">
-            <div className="user-menu-container">
-              <div
-                className="user-button"
-                onClick={() => setShowUserMenu(!showUserMenu)}
-              >
-                <div className="user-circle">{userInicial}</div>
-                <span className="user-name">{user.nombre}</span>
-              </div>
-              {showUserMenu && (
-                <div className="user-dropdown_sesion">
-                  <button
-                    className="botoncerrarsesion"
-                    onClick={handleLogout}
-                  >
-                    Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* HEADER superior */}
+          <div className="gestion-header">
+            <UserHeader nombreUsuario="Sole Sueñitos" />
+          </div>
           </div>
 
           {/* TÍTULO */}

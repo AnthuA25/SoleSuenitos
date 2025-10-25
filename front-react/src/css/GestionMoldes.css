@@ -88,16 +88,40 @@
   padding: 40px 50px;
   display: flex;
   flex-direction: column;
+
 }
 
-.gestion-content h1 {
+.gestion-contenttt {
+  flex: 1;
+  padding: 40px 50px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 70px;
+  margin-left: -20px;
+}
+
+.gestion-contenttt h1 {
+  font-size: 28px;
+  color: #2f4f4f;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.gestion-contentt {
+  flex: 1;
+  padding: 40px 50px;
+  display: flex;
+  flex-direction: column;
+    margin-left: 20px;
+
+}
+.gestion-contentt h1 {
   font-size: 28px;
   color: #2f4f4f;
   margin-bottom: 10px;
   font-weight: bold;
 }
 
-.gestion-content h3 {
+.gestion-contentt h3 {
   font-size: 18px;
   color: #666;
   margin-bottom: 30px;

@@ -1,20 +1,16 @@
-// src/pages/HistorialRollos.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import logo_blanco from "../../images/logo_blanco.svg";
-import "../../css/GestionMoldes.css";
-import UserHeader from "../../components/UserHeader";
-import { FaSearch } from "react-icons/fa";
+import logo_blanco from "./images/logo_blanco.svg";
+import "./css/GestionMoldes.css";
 
 function HistorialRollos() {
   const navigate = useNavigate();
   const [rollos, setRollos] = useState([]);
   const [filtroCodigo, setFiltroCodigo] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
-  const [filtroTipo, setFiltroTipo] = useState("codigo");
   const [ordenAscendente, setOrdenAscendente] = useState(true);
-
+  
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalIndex, setModalIndex] = useState(null);
@@ -25,6 +21,11 @@ function HistorialRollos() {
     color: "",
     proveedor: "",
   });
+
+  // Usuario y dropdown
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const user = { nombre: "Sole Suenito" };
+  const userInicial = user.nombre.charAt(0).toUpperCase();
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("rollos") || "[]");
@@ -98,17 +99,31 @@ function HistorialRollos() {
   };
 
   const rollosFiltrados = rollos.filter((r) => {
-    const texto = filtroCodigo.toLowerCase();
-    const campo = (r[filtroTipo] || "").toLowerCase();
-    const coincideCampo = campo.includes(texto);
+    const coincideCodigo = filtroCodigo
+      ? (r.codigo || "").toLowerCase().includes(filtroCodigo.toLowerCase())
+      : true;
     const coincideEstado = filtroEstado ? r.estado === filtroEstado : true;
-    return coincideCampo && coincideEstado;
+    return coincideCodigo && coincideEstado;
   });
 
   const handleReset = () => {
     setFiltroCodigo("");
     setFiltroEstado("");
-    setFiltroTipo("codigo");
+  };
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: "¿Cerrar sesión?",
+      text: "¿Deseas salir del sistema?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#2f6d6d",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, cerrar sesión",
+      cancelButtonText: "Cancelar",
+    }).then((res) => {
+      if (res.isConfirmed) navigate("/");
+    });
   };
 
   return (
@@ -137,8 +152,54 @@ function HistorialRollos() {
 
         {/* Contenido */}
         <div className="gestion-content">
+          {/* HEADER superior con usuario */}
           <div className="gestion-header" style={{ display: "flex", justifyContent: "flex-end" }}>
-            <UserHeader nombreUsuario="Sole Sueñitos" />
+            <div className="user-menu-container">
+              <div 
+                className="user-button" 
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+              >
+                <div className="user-circle" style={{
+                  width: "35px",
+                  height: "35px",
+                  borderRadius: "50%",
+                  backgroundColor: "#2f6d6d",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "8px"
+                }}>{userInicial}</div>
+                <span style={{fontWeight: 600, color:"#2f6d6d"}}>{user.nombre}</span>
+              </div>
+              {showUserMenu && (
+                <div className="user-dropdown_sesion" style={{
+                  position: "absolute",
+                  backgroundColor: "#2f6d6d",
+                  border: "1px solid #ccc",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  marginTop: "8px",
+                  right: 0
+                }}>
+                  <button 
+                    className="botoncerrarsesion" 
+                    onClick={handleLogout}
+                    style={{
+                      background: "#2f6d6d",
+                      color: "#fff",
+                      border: "none",
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -150,107 +211,56 @@ function HistorialRollos() {
           </p>
 
           {/* Filtros */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 16,
-              gap: 10,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                <FaSearch
-                  style={{
-                    position: "absolute",
-                    left: 10,
-                    color: "#666",
-                    fontSize: 14,
-                  }}
-                />
-                <input
-                  placeholder="Buscar"
-                  value={filtroCodigo}
-                  onChange={(e) => setFiltroCodigo(e.target.value)}
-                  style={{
-                    padding: "8px 8px 8px 30px",
-                    borderRadius: 8,
-                    border: "1px solid #ccc",
-                    width: 180,
-                    backgroundColor: "#fff",
-                    color: "black",
-                  }}
-                />
-              </div>
-
-              <select
-                value={filtroTipo}
-                onChange={(e) => setFiltroTipo(e.target.value)}
-                style={{
-                  padding: 8,
-                  borderRadius: 8,
-                  border: "1px solid #ccc",
-                  backgroundColor: "#fff",
-                  color: "black",
-                }}
-              >
-                <option value="codigo">Código</option>
-                <option value="metraje">Metraje</option>
-                <option value="color">Color</option>
-                <option value="tipoTela">Tipo de tela</option>
-                <option value="ancho">Ancho</option>
-                <option value="proveedor">Proveedor</option>
-              </select>
-
-              <select
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
-                style={{
-                  padding: 8,
-                  borderRadius: 8,
-                  border: "1px solid #ccc",
-                  backgroundColor: "#fff",
-                  color: "black",
-                }}
-              >
-                <option value="">Estado</option>
-                <option value="Disponible">Disponible</option>
-                <option value="Agotado">Agotado</option>
-              </select>
-            </div>
-
+          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+            <input
+              placeholder="Buscar código..."
+              value={filtroCodigo}
+              onChange={(e) => setFiltroCodigo(e.target.value)}
+              style={{ padding: 8, borderRadius: 8, border: "1px solid #ccc", flex: 1, backgroundColor: "#e0f7fa", color: "black" }}
+            />
+            <select
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value)}
+              style={{ padding: 8, borderRadius: 8, border: "1px solid #ccc", backgroundColor: "#e0f7fa", color: "black" }}
+            >
+              <option value="">Estado</option>
+              <option value="Disponible">Disponible</option>
+              <option value="Agotado">Agotado</option>
+            </select>
             <button
               onClick={handleReset}
               style={{
                 backgroundColor: "#2f6d6d",
                 color: "white",
                 border: "none",
-                padding: "8px 14px",
+                padding: "8px 12px",
                 borderRadius: 8,
                 cursor: "pointer",
               }}
             >
-              Resetear
+              Reset
             </button>
           </div>
 
           {/* Tabla */}
-          <div style={{ overflowX: "auto", background: "white", borderRadius: 10, boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
-            <table className="historial-tabla" style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ backgroundColor: "#2f6d6d", color: "white", textAlign: "left" }}>
+          <div style={{ overflowX: "auto", background: "white", borderRadius: 8 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }} className="historial-tabla">
+              <thead>
                 <tr>
-                  <th style={{ padding: "12px 10px" }}>Código</th>
-                  <th style={{ padding: "12px 10px" }}>Metraje (m)</th>
-                  <th style={{ padding: "12px 10px" }}>Color</th>
-                  <th style={{ padding: "12px 10px" }}>Tipo tela</th>
-                  <th style={{ padding: "12px 10px" }}>Ancho (mm)</th>
-                  <th style={{ padding: "12px 10px" }}>Proveedor</th>
-                  <th style={{ padding: "12px 10px" }}>Estado</th>
-                  <th style={{ padding: "12px 10px", cursor: "pointer" }} onClick={ordenarPorFecha}>
-                    Fecha ingreso
+                  <th>Código</th>
+                  <th>Metraje (m)</th>
+                  <th>Color</th>
+                  <th>Tipo de tela</th>
+                  <th>Ancho (mm)</th>
+                  <th>Proveedor</th>
+                  <th>Estado</th>
+                  <th style={{ cursor: "pointer" }} onClick={ordenarPorFecha}>
+                    Fecha ingreso{" "}
+                    <span style={{ color: "#2f6d6d", fontSize: "14px", marginLeft: 6 }}>
+                      {ordenAscendente ? "▲" : "▼"}
+                    </span>
                   </th>
-                  <th style={{ padding: "12px 10px" }}>Acciones</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -262,51 +272,40 @@ function HistorialRollos() {
                   </tr>
                 ) : (
                   rollosFiltrados.map((r, i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #eee" }}>
-                      <td style={{ padding: 12, color: "#222" }}>{r.codigo}</td>
-                      <td style={{ padding: 12, color: "#222" }}>{r.metraje}</td>
-                      <td style={{ padding: 12, color: "#222" }}>{r.color}</td>
-                      <td style={{ padding: 12, color: "#222" }}>{r.tipoTela}</td>
-                      <td style={{ padding: 12, color: "#222" }}>{r.ancho}</td>
-                      <td style={{ padding: 12, color: "#222" }}>{r.proveedor}</td>
-                      <td style={{ padding: 12 }}>
+                    <tr key={i}>
+                      <td style={{ padding: 12, color: "black"}}>{r.codigo}</td>
+                      <td style={{ padding: 12, color: "black" }}>{r.metraje}</td>
+                      <td style={{ padding: 12, color: "black" }}>{r.color}</td>
+                      <td style={{ padding: 12, color: "black" }}>{r.tipoTela}</td>
+                      <td style={{ padding: 12, color: "black" }}>{r.ancho}</td>
+                      <td style={{ padding: 12, color: "black" }}>{r.proveedor}</td>
+                      <td style={{ padding: 12, color: "black" }}>
                         <span
                           style={{
                             display: "inline-block",
-                            padding: "6px 10px",
-                            borderRadius: 20,
-                            background: r.estado === "Disponible" ? "#d7fbe8" : "#fbd7d7",
-                            color: r.estado === "Disponible" ? "#056b32" : "#a10000",
-                            fontWeight: 600,
+                            padding: "6px 8px",
+                            borderRadius: 8,
+                            background: r.estado === "Disponible" ? "#b7f2c2" : "#f8c7c7",
+                            color: r.estado === "Disponible" ? "#065f10" : "#a10000",
+                            
                           }}
                         >
                           {r.estado}
                         </span>
                       </td>
-                      <td style={{ padding: 12, color: "#444" }}>{r.fechaIngreso}</td>
-                      <td style={{ padding: 12 }}>
+                      <td style={{ padding: 12 , color: "black"}}>{r.fechaIngreso}</td>
+                      <td style={{ padding: 12, color: "black" }}>
                         <button
                           onClick={() => openEditarModal(i)}
-                          title="Ver / Editar"
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            fontSize: 18,
-                            marginRight: 8,
-                          }}
+                          title="Editar"
+                          style={{ marginRight: 8, background: "transparent", border: "none", cursor: "pointer" }}
                         >
-                          👁️
+                          ✏️
                         </button>
                         <button
                           onClick={() => handleEliminar(i)}
                           title="Eliminar"
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            fontSize: 18,
-                          }}
+                          style={{ background: "transparent", border: "none", cursor: "pointer" }}
                         >
                           🗑️
                         </button>
@@ -320,7 +319,7 @@ function HistorialRollos() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal de edición */}
       {isModalOpen && (
         <div
           onClick={() => setIsModalOpen(false)}
@@ -345,10 +344,10 @@ function HistorialRollos() {
               boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
             }}
           >
-            <h3 style={{ marginBottom: 8, color: "black" }}>Editar rollo</h3>
+            <h3 style={{ marginBottom: 8 , color: "black"}}>Editar rollo</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
-                <label style={{ display: "block", marginBottom: 6, color: "black" }}>Tipo tela</label>
+                <label style={{ display: "block", marginBottom: 6 , color: "black"}}>Tipo de tela</label>
                 <input
                   value={modalData.tipoTela}
                   onChange={(e) => setModalData({ ...modalData, tipoTela: e.target.value })}
@@ -356,7 +355,7 @@ function HistorialRollos() {
                 />
               </div>
               <div>
-                <label style={{ display: "block", marginBottom: 6, color: "black" }}>Metraje (m)</label>
+                <label style={{ display: "block", marginBottom: 6 , color: "black"}}>Metraje (m)</label>
                 <input
                   value={modalData.metraje}
                   onChange={(e) => setModalData({ ...modalData, metraje: e.target.value })}
@@ -364,7 +363,7 @@ function HistorialRollos() {
                 />
               </div>
               <div>
-                <label style={{ display: "block", marginBottom: 6, color: "black" }}>Ancho (mm)</label>
+                <label style={{ display: "block", marginBottom: 6 , color: "black"}}>Ancho (mm)</label>
                 <input
                   value={modalData.ancho}
                   onChange={(e) => setModalData({ ...modalData, ancho: e.target.value })}
@@ -372,7 +371,7 @@ function HistorialRollos() {
                 />
               </div>
               <div>
-                <label style={{ display: "block", marginBottom: 6, color: "black" }}>Color</label>
+                <label style={{ display: "block", marginBottom: 6 , color: "black"}}>Color</label>
                 <input
                   value={modalData.color}
                   onChange={(e) => setModalData({ ...modalData, color: e.target.value })}
@@ -380,7 +379,7 @@ function HistorialRollos() {
                 />
               </div>
               <div style={{ gridColumn: "1 / -1" }}>
-                <label style={{ display: "block", marginBottom: 6, color: "black" }}>Proveedor</label>
+                <label style={{ display: "block", marginBottom: 6 , color: "black"}}>Proveedor</label>
                 <input
                   value={modalData.proveedor}
                   onChange={(e) => setModalData({ ...modalData, proveedor: e.target.value })}
@@ -398,7 +397,7 @@ function HistorialRollos() {
                   border: "1px solid #ccc",
                   background: "#fff",
                   cursor: "pointer",
-                  color: "black",
+                  color: "black"
                 }}
               >
                 Cancelar
