@@ -40,15 +40,12 @@ function SidebarMenu() {
 
       {/* {rol === "Operario de Corte" && (
         <>
-          <li onClick={() => navigate("/ordenproduccion")}>Ver Ordenes Asignadas</li>
-          <li onClick={() => navigate("/reportaravance")}>Reportar Avance</li>
-          <li onClick={() => navigate("/historialcorte")}>Historial de Corte</li>
+          <li onClick={() => navigate("/producciondisponible")}>Ordenes de Produccion disponibles</li>
         </>
       )}
 
       {rol === "Inspector de Calidad" && (
         <>
-          <li onClick={() => navigate("/verlotes")}>Lotes Pendientes</li>
           <li onClick={() => navigate("/registrarinspeccion")}>Registrar Inspección</li>
           <li onClick={() => navigate("/historialinspeccion")}>Historial de Inspecciones</li>
         </>
