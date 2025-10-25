@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using back_net.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace back_net.Controllers
 {
@@ -15,38 +17,96 @@ namespace back_net.Controllers
             _context = context;
         }
 
-        
-        [HttpPost]
-        public async Task<IActionResult> RegistrarRollo([FromBody] RollosTela nuevoRollo)
+        public class RolloCreateDto
+        {
+            public string TipoTela { get; set; } = default!;
+            public decimal AnchoCm { get; set; }
+            public string? Color { get; set; }
+            public decimal MetrajeM { get; set; }
+            public string? Proveedor { get; set; }
+        }
+        [HttpPost("registrar")]
+        [Authorize(Policy = "SoloLogistica")]
+        public async Task<IActionResult> RegistrarRollo([FromBody] RolloCreateDto nuevoRollo)
         {
             // Validar
-            if (string.IsNullOrEmpty(nuevoRollo.CodigoRollo) || string.IsNullOrEmpty(nuevoRollo.TipoTela))
-                return BadRequest(new { message = "Código de rollo y tipo de tela son obligatorios." });
+            if (string.IsNullOrEmpty(nuevoRollo.TipoTela))
+                return BadRequest(new { message = "Debe ingresar el tipo de tela." });
 
-            // Verificar si el código ya existe
-            bool existe = await _context.RollosTelas.AnyAsync(r => r.CodigoRollo == nuevoRollo.CodigoRollo);
-            if (existe)
-                return Conflict(new { message = "Ya existe un rollo con ese código." });
+            if (nuevoRollo.MetrajeM <= 0)
+                return BadRequest(new { message = "El metraje debe ser mayor a 0." });
 
-            nuevoRollo.FechaRecepcion = DateTime.UtcNow;
-            nuevoRollo.Estado = "disponible";
+            // Obtener usuario autenticado
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            int? idUsuario = userIdClaim != null ? int.Parse(userIdClaim.Value) : (int?)null;
 
-            _context.RollosTelas.Add(nuevoRollo);
+            // Generar código automáticamente
+            var ultimoRollo = await _context.RollosTelas
+                .OrderByDescending(r => r.IdRollo)
+                .FirstOrDefaultAsync();
+
+            string nuevoCodigo = "R-001";
+            if (ultimoRollo != null)
+            {
+                var numero = int.Parse(ultimoRollo.CodigoRollo.Replace("R-", ""));
+                nuevoCodigo = $"R-{(numero + 1).ToString("000")}";
+            }
+
+
+            var rollo = new RollosTela
+            {
+                CodigoRollo = nuevoCodigo,
+                TipoTela = nuevoRollo.TipoTela,
+                AnchoCm = nuevoRollo.AnchoCm,
+                Color = nuevoRollo.Color,
+                MetrajeM = nuevoRollo.MetrajeM,
+                Proveedor = nuevoRollo.Proveedor,
+                FechaRecepcion = DateTime.UtcNow,
+                Estado = "disponible",
+                IdUsuarioRegistro = idUsuario
+            };
+
+            _context.RollosTelas.Add(rollo);
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 message = "Rollo registrado correctamente.",
-                rollo = nuevoRollo
+                rollo.CodigoRollo,
+                rollo.TipoTela,
+                rollo.AnchoCm,
+                rollo.Color,
+                rollo.MetrajeM,
+                rollo.Proveedor,
+                rollo.FechaRecepcion,
+                rollo.Estado,
+                rollo.IdUsuarioRegistro
             });
         }
 
         // listar
-        [HttpGet]
+        [HttpGet("listar")]
+        [Authorize(Policy = "SoloLogistica")]
         public async Task<IActionResult> ListarRollos()
         {
             var rollos = await _context.RollosTelas
                 .Include(r => r.IdUsuarioRegistroNavigation)
+                .OrderByDescending(r => r.FechaRecepcion)
+                .Select(r => new
+                {
+                    r.IdRollo,
+                    r.CodigoRollo,
+                    r.TipoTela,
+                    r.Color,
+                    r.AnchoCm,
+                    r.MetrajeM,
+                    r.Proveedor,
+                    r.FechaRecepcion,
+                    r.Estado,
+                    UsuarioRegistro = r.IdUsuarioRegistroNavigation != null
+                        ? r.IdUsuarioRegistroNavigation.NombreCompleto
+                        : "Desconocido"
+                })
                 .ToListAsync();
 
             return Ok(rollos);
@@ -54,29 +114,139 @@ namespace back_net.Controllers
 
         // get rollo x id
         [HttpGet("{id}")]
+        [Authorize(Policy = "SoloLogistica")]
         public async Task<IActionResult> ObtenerPorId(int id)
+        {
+            var rollo = await _context.RollosTelas
+                .Include(r => r.IdUsuarioRegistroNavigation)
+                .FirstOrDefaultAsync(r => r.IdRollo == id);
+
+            if (rollo == null)
+                return NotFound(new { message = "Rollo no encontrado." });
+
+            return Ok(new
+            {
+                rollo.IdRollo,
+                rollo.CodigoRollo,
+                rollo.TipoTela,
+                rollo.Color,
+                rollo.AnchoCm,
+                rollo.MetrajeM,
+                rollo.Proveedor,
+                rollo.FechaRecepcion,
+                rollo.Estado,
+                UsuarioRegistro = rollo.IdUsuarioRegistroNavigation?.NombreCompleto ?? "Desconocido"
+            });
+        }
+
+        // buscar por codigo
+        [HttpGet("buscar")]
+        [Authorize(Policy = "SoloLogistica")]
+        public async Task<IActionResult> BuscarPorCodigo([FromQuery] string criterio)
+        {
+            if (string.IsNullOrWhiteSpace(criterio))
+                return BadRequest(new { message = "Debe ingresar un criterio de búsqueda (código, tipo, color o proveedor)." });
+
+            criterio = criterio.Trim().ToLower();
+
+            var resultados = await _context.RollosTelas
+                .Where(r =>
+                    EF.Functions.ILike(r.CodigoRollo, $"%{criterio}%") ||
+                    EF.Functions.ILike(r.TipoTela, $"%{criterio}%") ||
+                    EF.Functions.ILike(r.Color ?? "", $"%{criterio}%") ||
+                    EF.Functions.ILike(r.Proveedor ?? "", $"%{criterio}%"))
+                .OrderByDescending(r => r.FechaRecepcion)
+                .Select(r => new
+                {
+                    r.IdRollo,
+                    r.CodigoRollo,
+                    r.TipoTela,
+                    r.Color,
+                    r.AnchoCm,
+                    r.MetrajeM,
+                    r.Proveedor,
+                    r.Estado,
+                    r.FechaRecepcion
+                })
+                .ToListAsync();
+
+            if (resultados == null || resultados.Count == 0)
+                return NotFound(new { message = "No se encontraron rollos con ese criterio." });
+
+            return Ok(resultados);
+        }
+
+        // DTO para edición
+        public class UpdateRolloRequest
+        {
+            public string? CodigoRollo { get; set; }
+            public string? TipoTela { get; set; }
+            public decimal? AnchoCm { get; set; }
+            public string? Color { get; set; }
+            public decimal? MetrajeM { get; set; }
+            public string? Proveedor { get; set; }
+            public string? Estado { get; set; }             //"disponible", "agotado"
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Policy = "SoloLogistica")]
+        public async Task<IActionResult> EditarRollo(int id, [FromBody] UpdateRolloRequest req)
+        {
+            var rollo = await _context.RollosTelas.FirstOrDefaultAsync(r => r.IdRollo == id);
+            if (rollo == null)
+                return NotFound(new { message = "Rollo no encontrado." });
+
+            // Validar duplicado de código si se cambia
+            if (!string.IsNullOrWhiteSpace(req.CodigoRollo) && req.CodigoRollo != rollo.CodigoRollo)
+            {
+                bool codigoExiste = await _context.RollosTelas
+                    .AnyAsync(r => r.CodigoRollo == req.CodigoRollo && r.IdRollo != id);
+                if (codigoExiste)
+                    return Conflict(new { message = "Ya existe un rollo con ese código." });
+
+                rollo.CodigoRollo = req.CodigoRollo.Trim();
+            }
+
+            // Actualizaciones parciales
+            if (!string.IsNullOrWhiteSpace(req.TipoTela)) rollo.TipoTela = req.TipoTela.Trim();
+            if (req.AnchoCm.HasValue) rollo.AnchoCm = req.AnchoCm.Value;
+            if (req.Color != null) rollo.Color = string.IsNullOrWhiteSpace(req.Color) ? null : req.Color.Trim();
+            if (req.MetrajeM.HasValue) rollo.MetrajeM = req.MetrajeM.Value;
+            if (req.Proveedor != null) rollo.Proveedor = string.IsNullOrWhiteSpace(req.Proveedor) ? null : req.Proveedor.Trim();
+            if (!string.IsNullOrWhiteSpace(req.Estado)) rollo.Estado = req.Estado.Trim();
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Rollo actualizado correctamente.",
+                rollo = new
+                {
+                    rollo.IdRollo,
+                    rollo.CodigoRollo,
+                    rollo.TipoTela,
+                    rollo.AnchoCm,
+                    rollo.Color,
+                    rollo.MetrajeM,
+                    rollo.Proveedor,
+                    rollo.Estado,
+                    rollo.FechaRecepcion
+                }
+            });
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Policy = "SoloLogistica")]
+        public async Task<IActionResult> EliminarRollo(int id)
         {
             var rollo = await _context.RollosTelas.FindAsync(id);
             if (rollo == null)
                 return NotFound(new { message = "Rollo no encontrado." });
 
-            return Ok(rollo);
-        }
+            rollo.Estado = "eliminado";
+            await _context.SaveChangesAsync();
 
-        // buscar por codigo
-        [HttpGet("buscar")]
-        public async Task<IActionResult> BuscarPorCodigo([FromQuery] string codigo)
-        {
-            if (string.IsNullOrEmpty(codigo))
-                return BadRequest(new { message = "Debe proporcionar un código de rollo." });
-
-            var rollo = await _context.RollosTelas
-                .FirstOrDefaultAsync(r => r.CodigoRollo == codigo);
-
-            if (rollo == null)
-                return NotFound(new { message = "No se encontró un rollo con ese código." });
-
-            return Ok(rollo);
+            return Ok(new { message = "Rollo eliminado correctamente." });
         }
     }
 }
