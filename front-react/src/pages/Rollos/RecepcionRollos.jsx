@@ -1,84 +1,68 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
 import SidebarMenu from "../../components/SliderMenu";
 import UserHeader from "../../components/UserHeader";
+import { registrarRollo } from "../../api/rolloService";
+
 
 function RecepcionRollos() {
-  const navigate = useNavigate();
+
   const [tipoTela, setTipoTela] = useState("");
   const [ancho, setAncho] = useState("");
   const [color, setColor] = useState("");
   const [metraje, setMetraje] = useState("");
   const [proveedor, setProveedor] = useState("");
-  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const user = { nombre: "Sole Suenito" };
-  const userInicial = user.nombre.charAt(0).toUpperCase();
 
-  // Guardar datos localmente
-  const handleGuardar = (e) => {
-    e.preventDefault();
+const handleGuardar = async (e) => {
+  e.preventDefault();
 
-    if (!tipoTela || !ancho || !color || !metraje || !proveedor) {
-      Swal.fire({
-        title: "¡Error!",
-        text: "Por favor complete todos los campos",
-        icon: "error",
-        confirmButtonColor: "#2f6d6d",
-      });
-      return;
-    }
+  // Validación de campos
+  if (!tipoTela || !ancho || !color || !metraje || !proveedor) {
+    Swal.fire({
+      title: "¡Error!",
+      text: "Por favor complete todos los campos",
+      icon: "error",
+      confirmButtonColor: "#2f6d6d",
+    });
+    return;
+  }
 
+  try {
     const nuevoRollo = {
-      id: Date.now(),
       tipoTela,
-      ancho,
+      anchoCm: parseFloat(ancho),
       color,
-      metraje,
+      metrajeM: parseFloat(metraje),
       proveedor,
     };
 
-    // Obtener los rollos existentes del localStorage
-    const rollosGuardados = JSON.parse(localStorage.getItem("rollos")) || [];
-
-    // Agregar el nuevo rollo
-    rollosGuardados.push(nuevoRollo);
-
-    // Guardar de nuevo
-    localStorage.setItem("rollos", JSON.stringify(rollosGuardados));
+    const response = await registrarRollo(nuevoRollo);
 
     Swal.fire({
-      title: "Registro Guardado",
-      text: "La recepción del rollo se guardó correctamente.",
+      title: "Registro guardado",
+      text: response.message || "La recepción del rollo se guardó correctamente.",
       icon: "success",
       confirmButtonColor: "#2f6d6d",
     });
-
-    // Limpiar campos
+    
     setTipoTela("");
     setAncho("");
     setColor("");
     setMetraje("");
     setProveedor("");
-  };
-
-  const handleLogout = () => {
+  } catch (error) {
     Swal.fire({
-      title: "¿Cerrar sesión?",
-      text: "¿Deseas salir del sistema?",
-      icon: "question",
-      showCancelButton: true,
+      title: "❌ Error al registrar",
+      text: error.message || "No se pudo registrar el rollo.",
+      icon: "error",
       confirmButtonColor: "#2f6d6d",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, cerrar sesión",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) navigate("/");
     });
-  };
+  }
+};
+
 
   return (
     <div className="gestion-container">
