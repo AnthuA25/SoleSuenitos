@@ -1,81 +1,78 @@
-import math
-import random
+# core/optimizer.py
+from typing import List, Dict
+from shapely.geometry import Polygon
+from shapely.affinity import translate, rotate
 
-# ==============================================================
-# 🧩 OPTIMIZADOR TEXTIL: Lógica de colocación de piezas
-# ==============================================================
+def _bbox(poly: Polygon):
+    minx, miny, maxx, maxy = poly.bounds
+    return maxx - minx, maxy - miny
 
-def shelf_pack(piezas, ancho_rollo_mm, largo_rollo_mm):
+def generar_layout(piezas: List[Dict], ancho_rollo: float, largo_rollo: float,
+                   permitir_giro_90: bool = True):
     """
-    Algoritmo tipo "Shelf Packing"
-    Coloca las piezas en filas (shelves) dentro del rollo textil.
-    Calcula métricas de aprovechamiento y desperdicio.
+    piezas: [{nombre, polygon, ...}]
+    Retorna (piezas_colocadas, largo_usado_mm, metricas)
     """
+    # Ordenar por alto descendente (heurística)
+    piezas = sorted(piezas, key=lambda p: _bbox(p["polygon"])[1], reverse=True)
 
-    x, y, max_y = 0, 0, 0
+    x, y = 10.0, 10.0          # margen
+    fila_altura = 0.0
+    largo_usado = 0.0
     colocadas = []
-    total_area = 0
 
     for p in piezas:
-        # Si no cabe en el ancho, pasa a la siguiente fila
-        if x + p["ancho_mm"] > ancho_rollo_mm:
-            x = 0
-            y += max_y
-            max_y = 0
+        poly = p["polygon"]
+        w, h = _bbox(poly)
 
-        # Si se pasa del largo del rollo, dejamos de colocar
-        if y + p["alto_mm"] > largo_rollo_mm:
-            print(f"Pieza {p['nombre']} no cabe en el rollo.")
-            continue
+        # Intenta sin rotar; si no cabe, intenta 90°
+        colocado = None
+        orient = 0
+        if x + w <= ancho_rollo - 10:
+            colocado = translate(poly, xoff=x, yoff=y)
+            orient = 0
+        elif permitir_giro_90 and p.get("permite_giro_90", True):
+            poly_r = rotate(poly, 90, origin='centroid', use_radians=False)
+            w2, h2 = _bbox(poly_r)
+            if x + w2 <= ancho_rollo - 10:
+                poly, w, h = poly_r, w2, h2
+                colocado = translate(poly, xoff=x, yoff=y)
+                orient = 90
+
+        # Si no cabe en esta fila, salta a otra
+        if colocado is None:
+            # cerrar fila
+            y += fila_altura + 10
+            x = 10
+            fila_altura = 0.0
+            if y + h > largo_rollo - 10:
+                raise ValueError("No hay largo suficiente en el rollo para colocar todas las piezas.")
+            # reintentar en nueva fila
+            colocado = translate(poly, xoff=x, yoff=y)
+            orient = 0
 
         colocadas.append({
-            **p,
-            "x": x,
-            "y": y
+            "nombre": p["nombre"],
+            "polygon": colocado,
+            "orientacion_deg": orient,
+            "ancho_mm": w,
+            "alto_mm": h,
+            "area_mm2": colocado.area
         })
 
-        x += p["ancho_mm"]
-        max_y = max(max_y, p["alto_mm"])
-        total_area += p["area_mm2"]
+        x += w + 10
+        fila_altura = max(fila_altura, h)
+        largo_usado = max(largo_usado, y + fila_altura + 10)
 
-    # Métricas del marcador
-    area_rollo = ancho_rollo_mm * largo_rollo_mm
-    eficiencia = round((total_area / area_rollo) * 100, 2)
-    desperdicio = round(100 - eficiencia, 2)
+    area_piezas = sum(pc["area_mm2"] for pc in colocadas)
+    area_rollo_usado = ancho_rollo * (largo_usado)
+    aprovechamiento = area_piezas / area_rollo_usado if area_rollo_usado > 0 else 0.0
 
-    kpis = {
-        "area_total_cm2": round(total_area / 100, 2),
-        "ancho_rollo_mm": ancho_rollo_mm,
-        "largo_rollo_mm": largo_rollo_mm,
-        "eficiencia": eficiencia,
-        "desperdicio": desperdicio,
-        "piezas_colocadas": len(colocadas)
+    metricas = {
+        "largo_usado_mm": round(largo_usado, 2),
+        "area_piezas_mm2": round(area_piezas, 2),
+        "area_rollo_usado_mm2": round(area_rollo_usado, 2),
+        "aprovechamiento_porcentaje": round(aprovechamiento * 100, 2),
+        "desperdicio_porcentaje": round((1 - aprovechamiento) * 100, 2)
     }
-
-    return colocadas, kpis
-
-
-# ==============================================================
-# 🔁 GENERADOR DE VERSIONES: Giros y orientaciones alternativas
-# ==============================================================
-
-def generar_version_con_giro(piezas, ancho_rollo_mm, largo_rollo_mm, orientacion="libre", giro_permitido=0):
-    """
-    Crea una nueva versión del marcador aplicando:
-    - Orientaciones restringidas ("recto hilo", "libre")
-    - Giros de piezas (0°, 90°, 180°)
-    """
-
-    nuevas_piezas = []
-
-    for p in piezas:
-        ancho, alto = p["ancho_mm"], p["alto_mm"]
-
-        # Aplicar giro si está permitido
-        if giro_permitido == 90:
-            ancho, alto = alto, ancho
-        elif giro_permitido == 180:
-            # 180° no cambia dimensiones, pero puede afectar orientación
-            pass
-
-        # Si la orientación es restringida (recto hilo), ma
+    return colocadas, largo_usado, metricas
