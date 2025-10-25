@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
+import UserHeader from "../../components/UserHeader";
 
 function HistorialRollos() {
   const navigate = useNavigate();
@@ -22,10 +23,6 @@ function HistorialRollos() {
     proveedor: "",
   });
 
-  // Usuario y dropdown
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const user = { nombre: "Sole Suenito" };
-  const userInicial = user.nombre.charAt(0).toUpperCase();
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("rollos") || "[]");
@@ -111,20 +108,6 @@ function HistorialRollos() {
     setFiltroEstado("");
   };
 
-  const handleLogout = () => {
-    Swal.fire({
-      title: "¿Cerrar sesión?",
-      text: "¿Deseas salir del sistema?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#2f6d6d",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, cerrar sesión",
-      cancelButtonText: "Cancelar",
-    }).then((res) => {
-      if (res.isConfirmed) navigate("/");
-    });
-  };
 
   return (
     <div className="gestion-container">
@@ -154,52 +137,7 @@ function HistorialRollos() {
         <div className="gestion-content">
           {/* HEADER superior con usuario */}
           <div className="gestion-header" style={{ display: "flex", justifyContent: "flex-end" }}>
-            <div className="user-menu-container">
-              <div 
-                className="user-button" 
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
-              >
-                <div className="user-circle" style={{
-                  width: "35px",
-                  height: "35px",
-                  borderRadius: "50%",
-                  backgroundColor: "#2f6d6d",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: "8px"
-                }}>{userInicial}</div>
-                <span style={{fontWeight: 600, color:"#2f6d6d"}}>{user.nombre}</span>
-              </div>
-              {showUserMenu && (
-                <div className="user-dropdown_sesion" style={{
-                  position: "absolute",
-                  backgroundColor: "#2f6d6d",
-                  border: "1px solid #ccc",
-                  padding: "10px",
-                  borderRadius: "6px",
-                  marginTop: "8px",
-                  right: 0
-                }}>
-                  <button 
-                    className="botoncerrarsesion" 
-                    onClick={handleLogout}
-                    style={{
-                      background: "#2f6d6d",
-                      color: "#fff",
-                      border: "none",
-                      padding: "8px 12px",
-                      borderRadius: "6px",
-                      cursor: "pointer"
-                    }}
-                  >
-                    Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </div>
+            <UserHeader nombreUsuario="Sole Sueñitos" />
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -243,8 +181,8 @@ function HistorialRollos() {
           </div>
 
           {/* Tabla */}
-          <div style={{ overflowX: "auto", background: "white", borderRadius: 8 }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }} className="historial-tabla">
+          
+            <table className="historial-tabla">
               <thead>
                 <tr>
                   <th>Código</th>
@@ -255,10 +193,7 @@ function HistorialRollos() {
                   <th>Proveedor</th>
                   <th>Estado</th>
                   <th style={{ cursor: "pointer" }} onClick={ordenarPorFecha}>
-                    Fecha ingreso{" "}
-                    <span style={{ color: "#2f6d6d", fontSize: "14px", marginLeft: 6 }}>
-                      {ordenAscendente ? "▲" : "▼"}
-                    </span>
+                    Fecha ingreso
                   </th>
                   <th>Acción</th>
                 </tr>
@@ -315,7 +250,6 @@ function HistorialRollos() {
                 )}
               </tbody>
             </table>
-          </div>
         </div>
       </div>
 
