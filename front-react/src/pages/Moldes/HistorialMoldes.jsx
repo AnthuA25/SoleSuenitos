@@ -204,7 +204,7 @@ function HistorialMoldes() {
             </button>
           </div>
 
-          {/* 📋 Tabla */}
+          {/* Tabla */}
           <table className="historial-tabla">
             <thead>
               <tr>
