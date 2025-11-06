@@ -21,6 +21,7 @@ namespace back_net.Controllers
         {
             public string TipoTela { get; set; } = default!;
             public decimal AnchoCm { get; set; }
+
             public string? Color { get; set; }
             public decimal MetrajeM { get; set; }
             public string? Proveedor { get; set; }
