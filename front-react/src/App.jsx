@@ -1,5 +1,5 @@
-// src/App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Login from "./pages/Login/Login.jsx";
 import GestionMoldes from "./pages/Moldes/GestionMoldes.jsx";
 import HistorialMoldes from "./pages/Moldes/HistorialMoldes.jsx";
@@ -7,37 +7,107 @@ import RecepcionRollos from "./pages/Rollos/RecepcionRollos.jsx";
 import HistorialRollos from "./pages/Rollos/HistorialRollos.jsx";
 import OrdenProduccion from "./pages/Optimizacion/OrdenProduccion.jsx";
 import HistorialOptimizaciones from "./pages/Optimizacion/HistorialOptimizaciones.jsx";
-import './css/Global.css' 
 
+// Operario de Corte
+import AprobacionMarcadores from "./pages/OperariodeCorte/AprobacionMarcadores.jsx";
+import MarcadorDigitalV1 from "./pages/OperariodeCorte/MarcadorDigitalV1.jsx";
+import MarcadorDigitalV2 from "./pages/OperariodeCorte/MarcadorDigitalV2.jsx";
+import HistorialOptimizacionesOperario from "./pages/OperariodeCorte/HistorialOptimizacionesope.jsx";
 
+import "./css/Global.css";
+import "./css/GestionMoldes.css";
 
 function App() {
+  const [rol, setRol] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  try {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (usuario?.rol && usuario?.logueado) {
+      setRol(usuario.rol);
+    } else {
+      setRol(null);
+    }
+  } catch (error) {
+    console.error("Error al cargar usuario:", error);
+    localStorage.removeItem("usuario");
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
+
+  // Mostrar loading mientras verifica sesión
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh' 
+      }}>
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
+  // Si no hay usuario logueado, mostrar solo login
+  if (!rol) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta principal = login */}
-        <Route path="/" element={<Login />} />
+        {/* RUTAS PARA ADMIN / ENCARGADO DE LOGÍSTICA */}
+        {rol === "admin" && (
+          <>
+            <Route path="/moldes" element={<GestionMoldes />} />
+            <Route path="/historialmoldes" element={<HistorialMoldes />} />
+            <Route path="/recepcionrollos" element={<RecepcionRollos />} />
+            <Route path="/historialrollos" element={<HistorialRollos />} />
+            <Route path="/ordenproduccion" element={<OrdenProduccion />} />
+            <Route path="/historialopti" element={<HistorialOptimizaciones />} />
+            
+            {/* Redirigir / al dashboard principal */}
+            <Route path="/" element={<Navigate to="/moldes" replace />} />
+          </>
+        )}
 
-        {/* vista de gestion de moldes*/}
-        <Route path="/moldes" element={<GestionMoldes />} />
-        
-        {/*vista de historial de moldes*/}
-        <Route path="/historialmoldes" element={<HistorialMoldes />} />
+        {/* RUTAS PARA OPERARIO DE CORTE */}
+        {rol === "operario" && (
+          <>
+            <Route path="/aprobacionmarcadores" element={<AprobacionMarcadores />} />
+            
+            {/* Rutas separadas para V1 y V2 */}
+            <Route path="/marcadordigitalv1" element={<MarcadorDigitalV1 />} />
+            <Route path="/marcadordigitalv2" element={<MarcadorDigitalV2 />} />
+            
+            <Route path="/historialoptioperario" element={<HistorialOptimizacionesOperario />} />
+            
+            {/* Redirigir / al dashboard principal */}
+            <Route path="/" element={<Navigate to="/aprobacionmarcadores" replace />} />
+          </>
+        )}
 
-        {/*vista de recepcion de Rollos*/}
-        <Route path="/recepcionrollos" element={<RecepcionRollos />} />
-
-        {/*vista de Historial de Rollos*/}
-        <Route path="/historialrollos" element={<HistorialRollos />} />
-
-        {/*vista de Orden de Produccion*/}
-        <Route path="/ordenproduccion" element={<OrdenProduccion />} />
-
-      {/*vista de Optimizacionv1*/}
-        {/* <Route path="/optimizacion" element={<Optimizacion />} />    */}
-
-      {/*vista de Historial de Optimizacion*/}
-        <Route path="/historialopti" element={<HistorialOptimizaciones />} />
+        {/* Ruta catch-all - redirige según rol */}
+        <Route
+          path="*"
+          element={
+            <Navigate 
+              to={rol === "admin" ? "/moldes" : "/aprobacionmarcadores"} 
+              replace 
+            />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
