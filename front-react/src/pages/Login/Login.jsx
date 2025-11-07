@@ -71,7 +71,7 @@ function Login() {
         const rol = usuario.rol?.toLowerCase();
         if (rol.includes("logística")) navigate("/recepcionrollos");
         else if (rol.includes("operario")) navigate("/moldes");
-        else if (rol.includes("calidad")) navigate("/historialmoldes");
+        else if (rol.includes("calidad")) navigate("/registrarInspeccion");
         else navigate("/moldes");
       });
     } catch (error) {

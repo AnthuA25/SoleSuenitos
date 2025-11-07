@@ -37,19 +37,19 @@ function SidebarMenu() {
           </li>
         </>
       )}
-
+      {rol === "Inspector de Calidad" && (
+          <>
+             <li onClick={() => navigate("/registrarinspeccion")}>Registrar Inspección</li>
+             <li onClick={() => navigate("/historialinspeccion")}>Historial de Inspecciones</li>
+          </>
+      )} 
       {/* {rol === "Operario de Corte" && (
         <>
           <li onClick={() => navigate("/producciondisponible")}>Ordenes de Produccion disponibles</li>
         </>
-      )}
+      )*/}
 
-      {rol === "Inspector de Calidad" && (
-        <>
-          <li onClick={() => navigate("/registrarinspeccion")}>Registrar Inspección</li>
-          <li onClick={() => navigate("/historialinspeccion")}>Historial de Inspecciones</li>
-        </>
-      )} */}
+      
     </ul>
   );
 }

@@ -6,9 +6,10 @@ import HistorialMoldes from "./pages/Moldes/HistorialMoldes.jsx";
 import RecepcionRollos from "./pages/Rollos/RecepcionRollos.jsx";
 import HistorialRollos from "./pages/Rollos/HistorialRollos.jsx";
 import OrdenProduccion from "./pages/Optimizacion/OrdenProduccion.jsx";
-import HistorialOptimizaciones from "./pages/Optimizacion/HistorialOptimizaciones.jsx";
+import HistorialOptimizaciones from "./pages/Optimizacion/HistorialOptimizaciones.jsx"
+import RegistrarInspeccion from "./pages/Inspector Calidad/RegistrarInspeccion.jsx";
+import HistorialInspeccion from "./pages/Inspector Calidad/HistorialInspeccion.jsx";
 import './css/Global.css' 
-
 
 
 function App() {
@@ -38,6 +39,12 @@ function App() {
 
       {/*vista de Historial de Optimizacion*/}
         <Route path="/historialopti" element={<HistorialOptimizaciones />} />
+
+      {/*vista de Registrar Inspeccion*/}
+        <Route path="/registrarinspeccion" element={<RegistrarInspeccion />} />
+      
+      {/*vista de Historial de Inspeccion*/}
+        <Route path="/historialInspeccion" element={<HistorialInspeccion />} />
       </Routes>
     </BrowserRouter>
   );
