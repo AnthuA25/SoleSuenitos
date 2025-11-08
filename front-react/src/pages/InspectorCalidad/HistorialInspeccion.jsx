@@ -5,7 +5,7 @@ import UserHeader from "../../components/UserHeader";
 import logo_blanco from "../../images/logo_blanco.svg";
 import { FaEye, FaRegEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
 import "../../css/GestionMoldes.css";
-
+ 
 export default function HistorialInspeccion() {
   const [busqueda, setBusqueda] = useState("");
   const [datos, setDatos] = useState([
@@ -51,26 +51,31 @@ export default function HistorialInspeccion() {
       criterios: [],
     },
   ]);
-
+ 
   // ✅ Mostrar detalles en SweetAlert2
   const handleVer = (row) => {
     const criteriosHTML = row.criterios
       .map(
-        (c) => `
+        (c, i) => `
         <tr>
           <td style="padding: 8px; text-align:left;">${c.pregunta}</td>
-          <td style="text-align:center;">${
-            c.cumple ? "✅" : "❌"
-          }</td>
+          <td style="text-align:center;">${c.cumple ? "✅" : "❌"}</td>
           <td style="padding: 8px;">${c.observacion}</td>
           <td style="text-align:center;">
-            <button style="padding:4px 8px; border-radius:5px; border:none; background:#0f836f; color:white; cursor:pointer;">Subir foto</button>
+            <button class="btn-upload" data-index="${i}" style="
+              padding:4px 8px;
+              border-radius:5px;
+              border:none;
+              background:#0f836f;
+              color:white;
+              cursor:pointer;
+            ">Subir foto</button>
           </td>
         </tr>
       `
       )
       .join("");
-
+ 
     Swal.fire({
       title: `<h3 style="margin-bottom:10px;">Detalle de Inspección - ${row.orden}</h3>`,
       html: `
@@ -97,6 +102,7 @@ export default function HistorialInspeccion() {
             }
           </tbody>
         </table>
+        <input type="file" id="fileInputHidden" style="display:none;" accept="image/*"/>
       `,
       width: 900,
       confirmButtonText: "Volver al historial",
@@ -104,10 +110,33 @@ export default function HistorialInspeccion() {
       cancelButtonText: "Exportar reporte",
       cancelButtonColor: "#0f836f",
       confirmButtonColor: "#2f6d6d",
+      didOpen: () => {
+        // 🔹 Agregar evento a cada botón "Subir foto"
+        const botones = Swal.getPopup().querySelectorAll(".btn-upload");
+        const inputFile = Swal.getPopup().querySelector("#fileInputHidden");
+ 
+        botones.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            inputFile.click();
+ 
+            inputFile.onchange = (e) => {
+              const archivo = e.target.files[0];
+              if (archivo) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Archivo cargado",
+                  text: `Se cargó: ${archivo.name}`,
+                  confirmButtonColor: "#2f6d6d",
+                });
+              }
+            };
+          });
+        });
+      },
     });
   };
-
-  // 🗑️ Confirmar y eliminar con SweetAlert2 (como tu ejemplo)
+ 
+  // 🗑️ Confirmar y eliminar con SweetAlert2
   const handleEliminar = async (codigo) => {
     const confirmacion = await Swal.fire({
       icon: "question",
@@ -124,14 +153,14 @@ export default function HistorialInspeccion() {
         cancelButton: "btn-cancelar",
       },
     });
-
+ 
     if (confirmacion.isConfirmed) {
       // eliminar de la lista
       setDatos((prev) => prev.filter((item) => item.codigo !== codigo));
-
+ 
       await Swal.fire({
         icon: "success",
-        title: "El molde fue eliminado",
+        title: "El registro fue eliminado",
         showConfirmButton: false,
         timer: 1500,
         customClass: {
@@ -140,7 +169,7 @@ export default function HistorialInspeccion() {
       });
     }
   };
-
+ 
   return (
     <div className="gestion-container">
       <div className="gestion-boxx">
@@ -156,25 +185,25 @@ export default function HistorialInspeccion() {
           </div>
           <SidebarMenu />
         </div>
-
+ 
         {/* Contenido */}
         <div className="gestion-contentt">
           <div className="gestion-header">
             <UserHeader nombreUsuario="Sole Sueñitos" />
           </div>
-
+ 
           <h1 className="titulo">Historial de Inspección</h1>
           <p className="subtexto">
             Consulte el registro de todas las inspecciones realizadas sobre
             órdenes de producción.
           </p>
-
+ 
           <div className="top-actions">
             <button className="btn-incidencia">
               <FaRegEdit size={16} /> Registrar Inspección
             </button>
           </div>
-
+ 
           <div className="busqueda-box">
             <input
               type="text"
@@ -186,12 +215,12 @@ export default function HistorialInspeccion() {
             <button className="btn-buscar">
               <FaSearch size={14} /> Buscar
             </button>
-
+ 
             <button className="btn-resetear">
               Resetear <FaRegEdit size={14} />
             </button>
           </div>
-
+ 
           <table className="tabla-historial">
             <thead>
               <tr>
@@ -204,7 +233,7 @@ export default function HistorialInspeccion() {
                 <th>Acción</th>
               </tr>
             </thead>
-
+ 
             <tbody>
               {datos.map((row, index) => (
                 <tr key={index}>

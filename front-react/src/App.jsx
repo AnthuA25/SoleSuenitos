@@ -9,10 +9,11 @@ import OrdenProduccion from "./pages/Optimizacion/OrdenProduccion.jsx";
 import HistorialOptimizaciones from "./pages/Optimizacion/HistorialOptimizaciones.jsx";
 
 // Operario de Corte
-import AprobacionMarcadores from "./pages/OperariodeCorte/AprobacionMarcadores.jsx";
-import MarcadorDigitalV1 from "./pages/OperariodeCorte/MarcadorDigitalV1.jsx";
-import MarcadorDigitalV2 from "./pages/OperariodeCorte/MarcadorDigitalV2.jsx";
+import OrdenesDisponibles from "./pages/OperariodeCorte/OrdenesDisponiblesope.jsx";
+import MarcadorDigital from "./pages/OperariodeCorte/MarcadorDigital.jsx";
 import HistorialOptimizacionesOperario from "./pages/OperariodeCorte/HistorialOptimizacionesope.jsx";
+
+// Inspector de Calidad
 import HistorialInspeccion from "./pages/InspectorCalidad/HistorialInspeccion.jsx";
 import RegistrarInspeccion from "./pages/InspectorCalidad/RegistrarInspeccion.jsx";
 import "./css/Global.css";
@@ -44,21 +45,20 @@ function App() {
 
         {/*vista de Aprobacion de Marcadores*/}
         <Route
-          path="/aprobacionmarcadores"
-          element={<AprobacionMarcadores />}
+          path="/OrdenesDisponiblesope"
+          element={<OrdenesDisponibles />}
         />
 
-        {/*vista de Marcador Digital V1*/}
-        <Route path="/marcadordigitalv1" element={<MarcadorDigitalV1 />} />
+        {/* Vista de Marcador Digital (Único para V1 y V2) */}
+        <Route path="/marcador/:codigo/:version" element={<MarcadorDigital />} />
 
-        {/*vista de Marcador Digital V2*/}
-        <Route path="/marcadordigitalv2" element={<MarcadorDigitalV2 />} />
+        {/* Rutas de compatibilidad (redirigen al componente único) */}
+        <Route path="/marcadordigitalv1" element={<Navigate to="/marcador/v1" replace />} />
+        <Route path="/marcadordigitalv2" element={<Navigate to="/marcador/v2" replace />} />
 
         {/*vista de Historial de Optimizacion Operario de Corte*/}
-        <Route
-          path="/historialoptiope"
-          element={<HistorialOptimizacionesOperario />}
-        />
+        <Route path="/historialoptiope/:codigo" element={<HistorialOptimizacionesOperario />} />
+
 
         {/*vista de Historial de Inspeccion*/}
         <Route path="/historialinspeccion" element={<HistorialInspeccion />} />

@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/GestionMoldes.css";
-
+ 
 function SidebarMenu() {
   const navigate = useNavigate();
   const [rol, setRol] = useState("");
-
+ 
   useEffect(() => {
     const usuario = JSON.parse(localStorage.getItem("usuario"));
     if (usuario && usuario.rol) {
       setRol(usuario.rol);
     }
   }, []);
-
+ 
   return (
-    <ul>
+    <ul className="sidebar-menu">
       {rol === "Encargado de Logistica" && (
         <>
           <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
@@ -35,7 +35,7 @@ function SidebarMenu() {
           </li>
         </>
       )}
-
+ 
       {rol === "Operario de Corte" && (
         <>
           <li onClick={() => navigate("/aprobacionmarcadores")}>
@@ -52,7 +52,7 @@ function SidebarMenu() {
           </li>
         </>
       )}
-
+ 
       {rol === "Inspector de Calidad" && (
         <>
           <li onClick={() => navigate("/registrarinspeccion")}>
@@ -66,5 +66,5 @@ function SidebarMenu() {
     </ul>
   );
 }
-
+ 
 export default SidebarMenu;
