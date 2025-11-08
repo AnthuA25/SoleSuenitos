@@ -1,15 +1,18 @@
-// src/OrdenProduccion.jsx
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
 import UserHeader from "../../components/UserHeader";
-// import { generarV1, generarV2 } from "../../api/ordenProduccionService";
+import SidebarMenu from "../../components/SliderMenu";
+import {
+  leerPiezas,
+  generarV1,
+  generarV2,
+  compararOptimizaciones,
+  listarRollos,
+} from "../../api/ordenProducciónService";
 
 function OrdenProduccion() {
-  const navigate = useNavigate();
-
   const [modelo, setModelo] = useState("");
   const [talla, setTalla] = useState("");
   const [cantidad, setCantidad] = useState("");
@@ -18,127 +21,95 @@ function OrdenProduccion() {
   const [moldes, setMoldes] = useState([]);
   const [showOptimizacion, setShowOptimizacion] = useState(false);
   const [optValues, setOptValues] = useState({});
-
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const user = { nombre: "Sole Sueñitos" };
-  const userInicial = user.nombre.charAt(0).toUpperCase();
-
-  // NUEVO: estado para V2 y comparación
   const [showMarcadorV2, setShowMarcadorV2] = useState(false);
   const [optValuesV2, setOptValuesV2] = useState(null);
   const [showCompararMarcadores, setShowCompararMarcadores] = useState(false);
 
-  // Cargar rollos desde localStorage (guardados por RecepcionRollos)
+  // Cargar rollos desde el backend
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("rollos") || "[]");
-    setRollosDisponibles(data.filter((r) => r.estado === "Disponible" || !r.estado));
+    const cargarRollos = async () => {
+      try {
+        const data = await listarRollos();
+        setRollosDisponibles(data);
+      } catch {
+        Swal.fire(
+          "Error",
+          "No se pudieron obtener los rollos desde el servidor.",
+          "error"
+        );
+      }
+    };
+    cargarRollos();
   }, []);
 
-  const toggleRollo = (codigo) => {
-    if (rollosSeleccionados.includes(codigo)) {
-      setRollosSeleccionados(rollosSeleccionados.filter((c) => c !== codigo));
-    } else {
-      setRollosSeleccionados([...rollosSeleccionados, codigo]);
-    }
-  };
-
-  // --- MODAL SUBIR MOLDE (.DXL)
+  // Subir molde DXF y leer piezas
   const handleSubirMolde = async () => {
     const { value: file } = await Swal.fire({
-      title: "Cargar Archivo",
-      text: "Subir archivo .dxl",
+      title: "Subir archivo DXF",
       input: "file",
-      inputAttributes: {
-        accept: ".dxl",
-        "aria-label": "Subir archivo .dxl",
-      },
+      inputAttributes: { accept: ".dxf" },
       showCancelButton: true,
       confirmButtonText: "Subir",
-      cancelButtonText: "Cancelar",
       confirmButtonColor: "#2f6d6d",
     });
+    if (!file) return;
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        Swal.fire("Subido", "El archivo fue cargado correctamente", "success");
-        const nuevo = {
-          pieza: "Molde subido",
-          dimensiones: "600x800",
-          area: 4800,
-          repeticiones: 1,
-          orientacion: "Recto hilo",
-        };
-        setMoldes((prev) => [...prev, nuevo]);
-      };
-      reader.readAsText(file);
+    const formData = new FormData();
+    formData.append("archivo", file);
+
+    Swal.fire({
+      title: "Analizando molde...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    try {
+      const result = await leerPiezas(formData);
+      Swal.close();
+
+      if (result?.piezas?.length) {
+        const nuevasPiezas = result.piezas.map((p) => ({
+          pieza: p.nombre,
+          dimensiones: `${p.ancho_mm} × ${p.alto_mm}`,
+          area: p.area_mm2.toFixed(2),
+          repeticiones: p.repeticiones ?? 1,
+          orientacion: p.permite_giro_90 ? "Giro 90°" : "Recto hilo",
+        }));
+        setMoldes(nuevasPiezas);
+        Swal.fire("Éxito", "Molde leído correctamente.", "success");
+      } else {
+        Swal.fire(
+          "Sin piezas",
+          "El archivo no contiene moldes válidos.",
+          "info"
+        );
+      }
+    } catch {
+      Swal.close();
+      Swal.fire("Error", "No se pudo leer el archivo DXF.", "error");
     }
   };
 
-  // --- MODAL ELEGIR MOLDE
-  const handleElegirMolde = async () => {
-    const { value: seleccion } = await Swal.fire({
-      title: "Seleccionar Molde",
-      html: `
-        <div style="text-align:left;">
-          <label><input type="checkbox" id="molde1" checked /> Molde Delantero</label><br/>
-          <label><input type="checkbox" id="molde2" /> Molde Espalda</label><br/>
-          <label><input type="checkbox" id="molde3" /> Molde Manga</label><br/>
-        </div>
-      `,
-      focusConfirm: false,
-      showCancelButton: true,
-      confirmButtonText: "Aceptar",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor: "#2f6d6d",
-      preConfirm: () => {
-        const seleccionados = [];
-        if (document.getElementById("molde1").checked) seleccionados.push("Delantero");
-        if (document.getElementById("molde2").checked) seleccionados.push("Espalda");
-        if (document.getElementById("molde3").checked) seleccionados.push("Manga");
-        return seleccionados;
-      },
-    });
+  // Mostrar rollos y seleccionar
 
-    if (seleccion && seleccion.length > 0) {
-      const nuevos = seleccion.map((nombre) => {
-        if (nombre === "Delantero") {
-          return { pieza: "Delantero", dimensiones: "600 × 800", area: 4800, repeticiones: 1, orientacion: "Recto hilo" };
-        }
-        if (nombre === "Espalda") {
-          return { pieza: "Espalda", dimensiones: "600 × 800", area: 4800, repeticiones: 1, orientacion: "Recto hilo" };
-        }
-        if (nombre === "Manga") {
-          return { pieza: "Manga", dimensiones: "400 × 600", area: 2400, repeticiones: 2, orientacion: "Libre" };
-        }
-        return null;
-      }).filter(Boolean);
-      setMoldes((prev) => [...prev, ...nuevos]);
-      Swal.fire("Seleccionado", "Molde(s) agregado(s) a la tabla", "success");
-    }
-  };
-
-  // --- VER ROLLOS (modal con selección) ---
   const handleVerRollos = async () => {
-    const data = JSON.parse(localStorage.getItem("rollos") || "[]");
-    if (!data || data.length === 0) {
+    if (rollosDisponibles.length === 0) {
       Swal.fire("Sin datos", "No hay rollos registrados aún.", "info");
       return;
     }
 
-    // Construir filas con checkboxes (marcadas si ya están seleccionadas)
-    const rows = data
+    const rows = rollosDisponibles
       .map((r, idx) => {
-        const checked = rollosSeleccionados.includes(r.codigo) ? "checked" : "";
+        const checked = rollosSeleccionados.includes(r.idRollo)
+          ? "checked"
+          : "";
         return `
           <tr>
             <td style="padding:6px;"><input type="checkbox" id="chk_${idx}" ${checked} /></td>
-            <td style="padding:6px;">${r.codigo || ("R" + (idx + 1))}</td>
-            <td style="padding:6px;">${r.tipoTela || "-"}</td>
-            <td style="padding:6px;">${r.color || "-"}</td>
-            <td style="padding:6px;">${r.metraje || "-"}</td>
-            <td style="padding:6px;">${r.proveedor || "-"}</td>
-            <td style="padding:6px;">${r.estado || "-"}</td>
+            <td style="padding:6px;">${r.codigoRollo}</td>
+            <td style="padding:6px;">${r.tipoTela}</td>
+            <td style="padding:6px;">${r.color}</td>
+            <td style="padding:6px;">${r.metrajeM}</td>
+            <td style="padding:6px;">${r.estado}</td>
           </tr>
         `;
       })
@@ -153,20 +124,17 @@ function OrdenProduccion() {
               <th style="padding:6px;">Código</th>
               <th style="padding:6px;">Tipo</th>
               <th style="padding:6px;">Color</th>
-              <th style="padding:6px;">Metraje</th>
-              <th style="padding:6px;">Proveedor</th>
+              <th style="padding:6px;">Metraje (m)</th>
               <th style="padding:6px;">Estado</th>
             </tr>
           </thead>
-          <tbody>
-            ${rows}
-          </tbody>
+          <tbody>${rows}</tbody>
         </table>
       </div>
     `;
 
     const { isConfirmed } = await Swal.fire({
-      title: "Rollos Registrados",
+      title: "Rollos Disponibles",
       html,
       width: "800px",
       showCancelButton: true,
@@ -174,205 +142,172 @@ function OrdenProduccion() {
       cancelButtonText: "Cerrar",
       confirmButtonColor: "#2f6d6d",
       preConfirm: () => {
-        // Recoger checks desde el DOM
         const seleccionados = [];
-        for (let i = 0; i < data.length; i++) {
+        for (let i = 0; i < rollosDisponibles.length; i++) {
           const el = document.getElementById(`chk_${i}`);
-          if (el && el.checked) seleccionados.push(data[i].codigo || ("R" + (i + 1)));
+          if (el && el.checked) seleccionados.push(rollosDisponibles[i]);
         }
         return seleccionados;
       },
     });
 
     if (isConfirmed) {
-      // Recoger selección final (por seguridad replicamos)
-      const finalSeleccion = [];
-      for (let i = 0; i < data.length; i++) {
+      const seleccion = [];
+      for (let i = 0; i < rollosDisponibles.length; i++) {
         const el = document.getElementById(`chk_${i}`);
-        if (el && el.checked) finalSeleccion.push(data[i].codigo || ("R" + (i + 1)));
+        if (el && el.checked) seleccion.push(rollosDisponibles[i]);
       }
-      setRollosSeleccionados(finalSeleccion);
-      Swal.fire("Hecho", `${finalSeleccion.length} rollo(s) seleccionados`, "success");
+      setRollosSeleccionados(seleccion);
+      Swal.fire(
+        "Hecho",
+        `${seleccion.length} rollo(s) seleccionados`,
+        "success"
+      );
     }
   };
 
-  // --- OPTIMIZAR CORTE ---
+  // Generar optimización V1
+
   const handleOptimizarCorte = async () => {
     if (!modelo || !talla || !cantidad) {
       Swal.fire("Completar", "Completa modelo, talla y cantidad", "warning");
       return;
     }
     if (rollosSeleccionados.length === 0) {
-      Swal.fire("Seleccionar rollos", "Selecciona al menos 1 rollo para la orden", "warning");
+      Swal.fire("Seleccionar", "Selecciona al menos un rollo", "warning");
       return;
     }
 
-    // --- Mostrar modal con progreso ---
-    let progress = 0;
-    Swal.fire({
-      title: "Optimizando corte...",
-      html: `
-        <div style="width:100%; background:#eee; border-radius:10px; margin-top:10px;">
-          <div id="progress-bar" style="width:0%; height:20px; background:#2f6d6d; border-radius:10px;"></div>
-        </div>
-        <p id="progress-text" style="margin-top:10px;">0%</p>
-      `,
-      allowOutsideClick: false,
-      showConfirmButton: false,
-      didOpen: () => {
-        const interval = setInterval(() => {
-          progress += Math.floor(Math.random() * 20);
-          if (progress >= 100) {
-            progress = 100;
-            clearInterval(interval);
-            Swal.close();
-
-            // Cuando termina, genera los valores
-            const telaUtilizada = `${(80 + Math.random() * 30).toFixed(1)} m`;
-            const tiempoEstimado = `${(1 + Math.random() * 2).toFixed(1)} h`;
-            const aprovechamiento = `${(70 + Math.random() * 25).toFixed(1)}%`;
-            const desperdicio = `${(5 + Math.random() * 20).toFixed(1)} m`;
-
-            setOptValues({
-              telaUtilizada,
-              tiempoEstimado,
-              aprovechamiento,
-              desperdicio,
-            });
-            setShowOptimizacion(true);
-
-            Swal.fire("Optimización completada", "Se generaron valores estimados", "success");
-          }
-          const bar = Swal.getPopup().querySelector("#progress-bar");
-          const text = Swal.getPopup().querySelector("#progress-text");
-          if (bar && text) {
-            bar.style.width = `${progress}%`;
-            text.textContent = `${progress}%`;
-          }
-        }, 500);
-      },
-    });
-  };
-
-  // --- GUARDAR V1 (guarda en localStorage como historial simple) ---
-  const handleGuardarV1 = () => {
-    const historial = JSON.parse(localStorage.getItem("optimizaciones") || "[]");
-    const nuevo = {
-      id: `V1-${Date.now()}`,
-      fecha: new Date().toLocaleString(),
-      valores: optValues,
-      modelo,
-      talla,
-      cantidad,
-      rollos: rollosSeleccionados,
-    };
-    historial.push(nuevo);
-    localStorage.setItem("optimizaciones", JSON.stringify(historial));
-    Swal.fire("Guardado", "Optimización v1 guardada (local)", "success");
-  };
-
-  // --- GENERAR V2 (modal) ---
-  const handleGenerarV2 = async () => {
-    const { value: formValues } = await Swal.fire({
-      title: "Generar marcador v2",
-      html: `
-        <div style="text-align:left;">
-          <label style="font-weight:600">Giro permitido</label>
-          <select id="giro" class="swal2-input">
-            <option value="" disabled selected>Seleccionar</option>
-            <option value="90°">90°</option>
-            <option value="Libre">Libre</option>
-          </select>
-          <label style="font-weight:600; margin-top:8px;">Orientación de piezas</label>
-          <select id="orientacion" class="swal2-input">
-            <option value="" disabled selected>Seleccionar</option>
-            <option value="Recto hilo">Recto hilo</option>
-            <option value="Libre">Libre</option>
-          </select>
-        </div>
-      `,
-      focusConfirm: false,
+    const { value: archivoMolde } = await Swal.fire({
+      title: "Selecciona el archivo DXF",
+      input: "file",
+      inputAttributes: { accept: ".dxf" },
       showCancelButton: true,
-      confirmButtonText: "Generar V2",
-      cancelButtonText: "Cancelar",
+      confirmButtonText: "Optimizar Corte (V1)",
       confirmButtonColor: "#2f6d6d",
-      preConfirm: () => {
-        const giro = document.getElementById("giro").value;
-        const orientacion = document.getElementById("orientacion").value;
-        if (!giro || !orientacion) {
-          Swal.showValidationMessage("Selecciona ambas opciones");
-          return false;
-        }
-        return { giro, orientacion };
-      },
+    });
+    if (!archivoMolde) return;
+
+    Swal.fire({
+      title: "Generando V1...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
     });
 
-    if (formValues) {
-      // Generar ligeras mejoras simuladas sobre optValues
-      // Si optValues no existe (por si el usuario no pasó por v1), usamos valores por defecto simulados
-      const baseTela = optValues.telaUtilizada ? parseFloat(optValues.telaUtilizada) : 85;
-      const baseTiempo = optValues.tiempoEstimado ? parseFloat(optValues.tiempoEstimado) : 1.8;
-      const baseAprovech = optValues.aprovechamiento ? parseFloat(optValues.aprovechamiento) : 75;
-      const baseDesp = optValues.desperdicio ? parseFloat(optValues.desperdicio) : 8;
+    try {
+      const formData = new FormData();
+      formData.append("modelo", modelo);
+      formData.append("talla", talla);
+      formData.append("cantidad", cantidad);
+      rollosSeleccionados.forEach((r) =>
+        formData.append("rollosSeleccionados", r.idRollo)
+      );
+      formData.append("archivoMolde", archivoMolde);
+      formData.append("permitirGiro90", true);
 
-      const telaV2 = `${(baseTela - Math.random() * 3).toFixed(1)} m`;
-      const tiempoV2 = `${(baseTiempo - Math.random() * 0.3).toFixed(1)} h`;
-      const aprovechV2 = `${(baseAprovech + Math.random() * 2).toFixed(1)}%`;
-      const desperdV2 = `${(baseDesp - Math.random() * 1).toFixed(1)} m`;
+      const result = await generarV1(formData);
+      Swal.close();
 
-      // Guardamos valores V2 en su propio estado
-      setOptValuesV2({
-        giro: formValues.giro,
-        orientacion: formValues.orientacion,
-        telaUtilizada: telaV2,
-        tiempoEstimado: tiempoV2,
-        aprovechamiento: aprovechV2,
-        desperdicio: desperdV2,
+      const data = result.data.data;
+      const metricas = data.metricas;
+      const imageUrl = data.png.replace(/\\/g, "/");
+      console.log(imageUrl)
+      setOptValues({
+        telaUtilizada: `${(metricas.largo_usado_mm / 1000).toFixed(2)} m`,
+        aprovechamiento: `${metricas.aprovechamiento_porcentaje.toFixed(2)}%`,
+        desperdicio: `${metricas.desperdicio_porcentaje.toFixed(2)}%`,
+        imagen: imageUrl,
       });
-
-      Swal.fire("Marcador V2 generado", `Giro: ${formValues.giro} · Orientación: ${formValues.orientacion}`, "success");
-
-      // Mostrar la vista V2
-      setShowOptimizacion(false);
-      setShowMarcadorV2(true);
-      setShowCompararMarcadores(false);
+      setShowOptimizacion(true);
+      Swal.fire("Éxito", "Optimización V1 generada correctamente.", "success");
+    } catch {
+      Swal.close();
+      Swal.fire("Error", "No se pudo generar la optimización.", "error");
     }
   };
 
-  // --- GUARDAR V2 (guarda en localStorage como historial con etiqueta V2) ---
-  const handleGuardarV2 = () => {
-    const historial = JSON.parse(localStorage.getItem("optimizaciones") || "[]");
-    const nuevo = {
-      id: `V2-${Date.now()}`,
-      fecha: new Date().toLocaleString(),
-      valores: optValuesV2,
-      modelo,
-      talla,
-      cantidad,
-      rollos: rollosSeleccionados,
-    };
-    historial.push(nuevo);
-    localStorage.setItem("optimizaciones", JSON.stringify(historial));
-    Swal.fire("Guardado", "Optimización v2 guardada (local)", "success");
-  };
+  // Generar optimización V2
 
-  // --- LOGOUT ---
-  const handleLogout = () => {
-    Swal.fire({
-      title: "¿Cerrar sesión?",
-      text: "¿Deseas salir del sistema?",
-      icon: "question",
+  const handleGenerarV2 = async () => {
+    const { value: archivoMolde } = await Swal.fire({
+      title: "Selecciona el archivo DXF para V2",
+      input: "file",
+      inputAttributes: { accept: ".dxf" },
       showCancelButton: true,
+      confirmButtonText: "Generar V2",
       confirmButtonColor: "#2f6d6d",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, cerrar sesión",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) navigate("/");
     });
+    if (!archivoMolde) return;
+
+    Swal.fire({
+      title: "Generando V2...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    try {
+      const formData = new FormData();
+      formData.append("modelo", modelo);
+      formData.append("talla", talla);
+      formData.append("cantidad", cantidad);
+      rollosSeleccionados.forEach((r) =>
+        formData.append("rollosSeleccionados", r.idRollo)
+      );
+      formData.append("archivoMolde", archivoMolde);
+      formData.append("permitirGiro90", true);
+
+      const result = await generarV2(formData);
+      Swal.close();
+
+      const m = result.data.metricas;
+      setOptValuesV2({
+        telaUtilizada: `${(m.largo_usado_mm / 1000).toFixed(2)} m`,
+        aprovechamiento: `${m.aprovechamiento_porcentaje.toFixed(2)}%`,
+        desperdicio: `${m.desperdicio_porcentaje.toFixed(2)}%`,
+      });
+
+      setShowOptimizacion(false);
+      setShowMarcadorV2(true);
+      Swal.fire("Éxito", "Optimización V2 generada correctamente.", "success");
+    } catch {
+      Swal.close();
+      Swal.fire("Error", "No se pudo generar V2.", "error");
+    }
   };
 
-  // --- Volver a la vista principal desde optimización ---
+  // Comparar marcadores
+
+  const handleComparar = async () => {
+    Swal.fire({
+      title: "Comparando V1 y V2...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    try {
+      const formData = new FormData();
+      formData.append("modelo", modelo);
+      formData.append("talla", talla);
+      formData.append("cantidad", cantidad);
+      rollosSeleccionados.forEach((r) =>
+        formData.append("rollosSeleccionados", r.idRollo)
+      );
+      formData.append("archivoMolde", new Blob([])); // dummy
+      formData.append("permitirGiro90", true);
+
+      const result = await compararOptimizaciones(formData);
+      Swal.close();
+      Swal.fire(
+        "Comparación completada",
+        `La mejor versión es: <b>${result.mejor_version}</b>`,
+        "success"
+      );
+      setShowCompararMarcadores(true);
+    } catch {
+      Swal.close();
+      Swal.fire("Error", "No se pudo realizar la comparación.", "error");
+    }
+  };
+
   const handleVolverOrden = () => {
     setShowOptimizacion(false);
     setShowMarcadorV2(false);
@@ -392,40 +327,15 @@ function OrdenProduccion() {
               </h2>
             </div>
           </div>
-
-          <ul>
-            <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
-            <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
-            <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
-            <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
-            <li className="active" onClick={() => navigate("/ordenproduccion")}>
-              Orden de Producción
-            </li>
-            <li onClick={() => navigate("/historialopti")}>Historial de Optimización</li>
-          </ul>
+          <SidebarMenu />
         </div>
 
         {/* Contenido */}
         <div className="gestion-content">
-          {/* HEADER superior */}
-          <div className="gestion-header">
-            <div>
-                {/* HEADER superior */}
           <div className="gestion-header">
             <UserHeader nombreUsuario="Sole Sueñitos" />
           </div>
 
-              {showUserMenu && (
-                <div className="user-dropdown_sesion">
-                  <button className="botoncerrarsesion" onClick={handleLogout}>
-                    Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ---- RENDERIZADO PRINCIPAL: Orden / Optimización V1 / Marcador V2 / Comparar ---- */}
           {!showOptimizacion && !showMarcadorV2 && !showCompararMarcadores ? (
             <>
               <h1>Orden de Producción</h1>
@@ -433,6 +343,7 @@ function OrdenProduccion() {
                 Crea una orden seleccionando rollos y moldes
               </p>
 
+              {/* Formulario */}
               <div
                 style={{
                   display: "grid",
@@ -442,7 +353,7 @@ function OrdenProduccion() {
                 }}
               >
                 <div>
-                  <label style={{ color: "black" }}>Modelo</label>
+                  <label>Modelo</label>
                   <input
                     className="orden-input"
                     value={modelo}
@@ -451,7 +362,7 @@ function OrdenProduccion() {
                   />
                 </div>
                 <div>
-                  <label style={{ color: "black" }}>Talla</label>
+                  <label>Talla</label>
                   <input
                     className="orden-input"
                     value={talla}
@@ -460,7 +371,7 @@ function OrdenProduccion() {
                   />
                 </div>
                 <div>
-                  <label style={{ color: "black" }}>Cantidad</label>
+                  <label>Cantidad</label>
                   <input
                     className="orden-input"
                     type="number"
@@ -469,25 +380,32 @@ function OrdenProduccion() {
                     placeholder="Ej. 10"
                   />
                 </div>
-
-                {/* Botón verde para ver rollos */}
                 <div>
-                  <label style={{ color: "black" }}>Rollos disponibles</label>
+                  <label>Rollos disponibles</label>
                   <button
                     className="elegir-btn"
-                    style={{ width: "100%", marginTop: 8 }}
                     onClick={handleVerRollos}
+                    style={{ width: "100%", marginTop: 8 }}
                   >
-                    Ver Rollos Disponibles
+                    Ver Rollos
                   </button>
-
-                  {/* Mostrar rollos seleccionados como tags */}
-                  <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <div
+                    style={{
+                      marginTop: 10,
+                      display: "flex",
+                      gap: 8,
+                      flexWrap: "wrap",
+                    }}
+                  >
                     {rollosSeleccionados.length === 0 ? (
-                      <span style={{ color: "#888", fontStyle: "italic" }}>No hay rollos seleccionados</span>
+                      <span style={{ color: "#888", fontStyle: "italic" }}>
+                        No hay rollos seleccionados
+                      </span>
                     ) : (
                       rollosSeleccionados.map((r) => (
-                        <div key={r} className="rollo-tag">{r}</div>
+                        <div key={r.idRollo} className="rollo-tag">
+                          {r.codigoRollo}
+                        </div>
                       ))
                     )}
                   </div>
@@ -498,71 +416,50 @@ function OrdenProduccion() {
                 <button className="subir-btn" onClick={handleSubirMolde}>
                   Subir molde
                 </button>
-                <button className="elegir-btn" onClick={handleElegirMolde}>
-                  Elegir molde
-                </button>
               </div>
 
+              {/* Tabla de moldes */}
               <div
                 style={{
                   background: "#fff",
                   borderRadius: 8,
                   padding: 12,
                   marginBottom: 12,
-                  display: "flex",
-                  flexDirection: "column",
                 }}
               >
-                <div className="tabla-scroll">
-                  <table className="orden-table">
-                    <thead>
+                <table className="orden-table">
+                  <thead>
+                    <tr>
+                      <th>Pieza</th>
+                      <th>Dimensiones</th>
+                      <th>Área (cm²)</th>
+                      <th>Repeticiones</th>
+                      <th>Orientación</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {moldes.length === 0 ? (
                       <tr>
-                        <th>Pieza</th>
-                        <th>Dimensiones</th>
-                        <th>Área (cm²)</th>
-                        <th>Repeticiones</th>
-                        <th>Orientación</th>
+                        <td
+                          colSpan="5"
+                          style={{ textAlign: "center", color: "#888" }}
+                        >
+                          Sin piezas cargadas
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {moldes.length === 0 ? (
-                        <>
-                          <tr>
-                            <td>Delantero</td>
-                            <td>600 × 800</td>
-                            <td>4800</td>
-                            <td>1</td>
-                            <td>Recto hilo</td>
-                          </tr>
-                          <tr>
-                            <td>Espalda</td>
-                            <td>600 × 800</td>
-                            <td>4800</td>
-                            <td>1</td>
-                            <td>Recto hilo</td>
-                          </tr>
-                          <tr>
-                            <td>Manga</td>
-                            <td>400 × 600</td>
-                            <td>2400</td>
-                            <td>2</td>
-                            <td>Libre</td>
-                          </tr>
-                        </>
-                      ) : (
-                        moldes.map((m, i) => (
-                          <tr key={i}>
-                            <td>{m.pieza}</td>
-                            <td>{m.dimensiones}</td>
-                            <td>{m.area}</td>
-                            <td>{m.repeticiones}</td>
-                            <td>{m.orientacion}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                    ) : (
+                      moldes.map((m, i) => (
+                        <tr key={i}>
+                          <td>{m.pieza}</td>
+                          <td>{m.dimensiones}</td>
+                          <td>{m.area}</td>
+                          <td>{m.repeticiones}</td>
+                          <td>{m.orientacion}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
 
                 <div
                   style={{
@@ -572,210 +469,115 @@ function OrdenProduccion() {
                     marginTop: 12,
                   }}
                 >
-                  <button className="cancelar-btn">Cancelar</button>
-                  <button className="optimizar-btn" onClick={handleOptimizarCorte}>
+                  <button className="cancelar-btn" onClick={handleVolverOrden}>
+                    Cancelar
+                  </button>
+                  <button
+                    className="optimizar-btn"
+                    onClick={handleOptimizarCorte}
+                  >
                     Optimizar Corte
                   </button>
                 </div>
               </div>
             </>
-          ) : showOptimizacion && !showMarcadorV2 && !showCompararMarcadores ? (
+          ) : showOptimizacion ? (
             <>
-              <h1>Optimización</h1>
-              <div
-                style={{
-                  background: "#204e4eff",
-                  padding: 50,
-                  borderRadius: 10,
-                  width: "80%",
-                  maxWidth: 600,
-                  borderBlockColor: "grey"
-                }}
-              >
-                <table style={{ width: "100%", marginBottom: 20 }}>
+              <h1>Optimización V1</h1>
+              <div className="optimizacion-box">
+                <table>
                   <tbody>
                     <tr>
-                      <td><strong>Tela utilizada:</strong></td>
-                      <td>{optValues.telaUtilizada}</td>
+                      <td>
+                        <b>Tela utilizada:</b>
+                      </td>
+                      <td>{optValues.telaUtilizadaM}</td>
                     </tr>
                     <tr>
-                      <td><strong>Tiempo estimado:</strong></td>
-                      <td>{optValues.tiempoEstimado}</td>
+                      <td>
+                        <b>Aprovechamiento:</b>
+                      </td>
+                      <td>{optValues.aprovechamientoPorcent}</td>
                     </tr>
                     <tr>
-                      <td><strong>Aprovechamiento:</strong></td>
-                      <td>{optValues.aprovechamiento}</td>
-                    </tr>
-                    <tr>
-                      <td><strong>Desperdicio:</strong></td>
-                      <td>{optValues.desperdicio}</td>
+                      <td>
+                        <b>Desperdicio:</b>
+                      </td>
+                      <td>{optValues.desperdicioM}</td>
                     </tr>
                   </tbody>
                 </table>
-
-                <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 12, paddingTop: 40}}>
-                  <button className="guardar-btn" onClick={handleGuardarV1}>
-                    Guardar v1
-                  </button>
-                  <button className="optimizar-btn" onClick={handleGenerarV2}>
-                    Generar v2
-                  </button>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>
-                  <button className="cancelar-btn" onClick={handleVolverOrden}>Volver a Orden</button>
-                </div>
-              </div>
-            </>
-          ) : showMarcadorV2 && !showCompararMarcadores ? (
-            // Vista Marcador V2
-            <>
-              <h1>Marcador Versión Óptima (v2)</h1>
-              <div
-                style={{
-                  background: "#204e4eff",
-                  padding: 50,
-                  borderRadius: 10,
-                  width: "80%",
-                  maxWidth: 600,
-                }}
-              >
-                {optValuesV2 ? (
-                  <table style={{ width: "100%", marginBottom: 20 }}>
-                    <tbody>
-                      <tr>
-                        <td><strong>Giro permitido:</strong></td>
-                        <td>{optValuesV2.giro}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Orientación:</strong></td>
-                        <td>{optValuesV2.orientacion}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Tela utilizada:</strong></td>
-                        <td>{optValuesV2.telaUtilizada}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Tiempo estimado:</strong></td>
-                        <td>{optValuesV2.tiempoEstimado}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Aprovechamiento:</strong></td>
-                        <td>{optValuesV2.aprovechamiento}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Desperdicio:</strong></td>
-                        <td>{optValuesV2.desperdicio}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                ) : (
-                  <p>No hay valores V2 generados.</p>
+                {optValues.imagen && (
+                  <div style={{ marginTop: 20, textAlign: "center" }}>
+                    <img
+                      src={optValues.imagen}
+                      alt="Marcador V1"
+                      style={{
+                        width: "80%",
+                        maxWidth: "800px",
+                        borderRadius: "10px",
+                        boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+                      }}
+                    />
+                  </div>
                 )}
-
-                <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 30 }}>
-                  <button className="guardar-btn" onClick={handleGuardarV2}>Guardar v2</button>
-                  {/* BOTON NUEVO: comparar marcadores */}
-                  <button
-                    className="optimizar-btn"
-                    onClick={() => {
-                      // al comparar queremos mostrar la vista comparativa
-                      // Si no hay optValues (v1) o optValuesV2, se intentará mostrar igualmente con valores por defecto
-                      setShowCompararMarcadores(true);
-                      setShowMarcadorV2(false);
-                    }}
-                  >
-                    Comparar marcadores
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 10,
+                    marginTop: 20,
+                  }}
+                >
+                  <button className="optimizar-btn" onClick={handleGenerarV2}>
+                    Generar V2
                   </button>
-                  <button className="cancelar-btn" onClick={handleVolverOrden}>Volver a Orden</button>
+                  <button className="cancelar-btn" onClick={handleVolverOrden}>
+                    Volver
+                  </button>
                 </div>
               </div>
             </>
-          ) : showCompararMarcadores ? (
-            // Vista comparación: Marcador versión óptima
+          ) : showMarcadorV2 ? (
             <>
-              <h1>Marcador versión óptima</h1>
-              <div
-                style={{
-                  background: "#fff",
-                  padding: 20,
-                  borderRadius: 8,
-                  width: "90%",
-                  maxWidth: 900,
-                  margin: "0 auto",
-                }}
-              >
-                <p style={{ color: "#666" }}>Comparativa entre V1 (actual) y V2 (optimizada)</p>
-
-                <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 12, backgroundColor: "#666"}}>
-                  <thead>
-                    <tr style={{ background: "#2f6d6d" }}>
-                      <th style={{ padding: 8, textAlign: "left" }}>Parámetro</th>
-                      <th style={{ padding: 8, textAlign: "left" }}>Versión 1</th>
-                      <th style={{ padding: 8, textAlign: "left" }}>Versión 2</th>
-                      <th style={{ padding: 8, textAlign: "left" }}>Óptimo</th>
-                    </tr>
-                  </thead>
+              <h1>Optimización V2</h1>
+              <div className="optimizacion-box">
+                <table>
                   <tbody>
                     <tr>
-                      <td style={{ padding: 8 }}>Giro permitido</td>
-                      <td style={{ padding: 8 }}>{optValues.giro || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.giro || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.giro || "-"}</td>
+                      <td>
+                        <b>Tela utilizada:</b>
+                      </td>
+                      <td>{optValuesV2?.telaUtilizada}</td>
                     </tr>
                     <tr>
-                      <td style={{ padding: 8 }}>Orientación</td>
-                      <td style={{ padding: 8 }}>{optValues.orientacion || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.orientacion || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.orientacion || "-"}</td>
+                      <td>
+                        <b>Aprovechamiento:</b>
+                      </td>
+                      <td>{optValuesV2?.aprovechamiento}</td>
                     </tr>
                     <tr>
-                      <td style={{ padding: 8 }}>Tela utilizada</td>
-                      <td style={{ padding: 8 }}>{optValues.telaUtilizada || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.telaUtilizada || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.telaUtilizada || "-"}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: 8 }}>Tiempo estimado</td>
-                      <td style={{ padding: 8 }}>{optValues.tiempoEstimado || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.tiempoEstimado || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.tiempoEstimado || "-"}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: 8 }}>Aprovechamiento</td>
-                      <td style={{ padding: 8 }}>{optValues.aprovechamiento || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.aprovechamiento || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.aprovechamiento || "-"}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: 8 }}>Desperdicio</td>
-                      <td style={{ padding: 8 }}>{optValues.desperdicio || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.desperdicio || "-"}</td>
-                      <td style={{ padding: 8 }}>{optValuesV2?.desperdicio || "-"}</td>
+                      <td>
+                        <b>Desperdicio:</b>
+                      </td>
+                      <td>{optValuesV2?.desperdicio}</td>
                     </tr>
                   </tbody>
                 </table>
-
-                <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 20 }}>
-                  <button className="guardar-btn"  onClick={() => {
-                    // Si el usuario aprueba el marcador óptimo, podemos guardar V2 y volver a la orden
-                    if (optValuesV2) {
-                      handleGuardarV2();
-                    }
-                    setShowCompararMarcadores(false);
-                    setShowMarcadorV2(false);
-                    setShowOptimizacion(false);
-                  }}>
-                    Aprobar marcador optimizado (Guardar V2)
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 10,
+                    marginTop: 20,
+                  }}
+                >
+                  <button className="optimizar-btn" onClick={handleComparar}>
+                    Comparar Marcadores
                   </button>
-                  <button className="cancelar-btn" onClick={() => {
-                    // volver a vista V2 para seguir acciones
-                    setShowCompararMarcadores(false);
-                    setShowMarcadorV2(true);
-                  }}>
-                    Volver a Marcador V2
+                  <button className="cancelar-btn" onClick={handleVolverOrden}>
+                    Volver
                   </button>
-                  <button className="cancelar-btn" onClick={handleVolverOrden}>Volver a Orden</button>
                 </div>
               </div>
             </>
