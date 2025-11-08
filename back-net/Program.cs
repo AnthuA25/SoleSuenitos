@@ -10,6 +10,9 @@ builder.Services.AddDatabase();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddRolePolicies();
 
+//  Registrar HttpClient (para comunicar con Python)
+builder.Services.AddHttpClient();
+
 // controladores
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
