@@ -45,8 +45,8 @@ namespace back_net.Controllers
 
             Response.Cookies.Append("AuthToken", token, new CookieOptions
             {
-                HttpOnly = true,        
-                Secure = true,          
+                HttpOnly = true,
+                Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddHours(8)
             });
@@ -69,7 +69,58 @@ namespace back_net.Controllers
             });
         }
 
+        public class ResetPasswordRequest
+        {
+            public string Correo { get; set; } = string.Empty;
+            public string NuevaContrasena { get; set; } = string.Empty;
+            public string ConfirmarContrasena { get; set; } = string.Empty;
+        }
 
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            // Validaciones básicas
+            if (string.IsNullOrEmpty(request.Correo) ||
+                string.IsNullOrEmpty(request.NuevaContrasena) ||
+                string.IsNullOrEmpty(request.ConfirmarContrasena))
+            {
+                return BadRequest(new { message = "Todos los campos son obligatorios." });
+            }
+
+            if (!EsCorreoValido(request.Correo))
+                return BadRequest(new { message = "El correo debe tener un formato válido (@ y .com)." });
+
+            if (request.NuevaContrasena.Length < 6)
+                return BadRequest(new { message = "La nueva contraseña debe tener al menos 6 caracteres." });
+
+            if (request.NuevaContrasena != request.ConfirmarContrasena)
+                return BadRequest(new { message = "Las contraseñas no coinciden." });
+
+            // Buscar usuario por correo
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == request.Correo && u.Activo == true);
+            if (usuario == null)
+                return NotFound(new { message = "No se encontró un usuario activo con ese correo." });
+
+            // Crear nuevo hash
+            string nuevoHash = CrearHash(request.NuevaContrasena);
+            usuario.ContrasenaHash = nuevoHash;
+
+            // Actualizar fecha de cambio
+            usuario.UltimoAcceso = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "La contraseña fue actualizada correctamente.",
+                usuario = new
+                {
+                    usuario.IdUsuario,
+                    usuario.NombreCompleto,
+                    usuario.Correo
+                }
+            });
+        }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest nuevo)
@@ -117,6 +168,8 @@ namespace back_net.Controllers
                 }
             });
         }
+
+
 
         private string CrearHash(string contrasena)
         {

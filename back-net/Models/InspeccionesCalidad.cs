@@ -29,6 +29,8 @@ public partial class InspeccionesCalidad
 
     public string? ResultadoFinal { get; set; }
 
+    public string? NotaAdicional { get; set; }
+
     public virtual OrdenProduccion IdOpNavigation { get; set; } = null!;
 
     public virtual Usuario? IdUsuarioInspectorNavigation { get; set; }

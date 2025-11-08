@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
 import UserHeader from "../../components/UserHeader";
+// import { generarV1, generarV2 } from "../../api/ordenProduccionService";
 
 function OrdenProduccion() {
   const navigate = useNavigate();

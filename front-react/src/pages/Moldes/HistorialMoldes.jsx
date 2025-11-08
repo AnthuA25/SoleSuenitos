@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
@@ -14,7 +14,7 @@ import SidebarMenu from "../../components/SliderMenu";
 import UserHeader from "../../components/UserHeader";
 
 function HistorialMoldes() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [moldes, setMoldes] = useState([]);
   const [filtro, setFiltro] = useState("codigoMolde");
   const [busqueda, setBusqueda] = useState("");
@@ -121,7 +121,7 @@ function HistorialMoldes() {
     }
   };
 
-  const handleRegistrar = () => navigate("/moldes");
+  // const handleRegistrar = () => navigate("/moldes");
 
 
   return (
@@ -254,6 +254,8 @@ function HistorialMoldes() {
         </div>
       </div>
     </div>
+
+    
   );
 }
 

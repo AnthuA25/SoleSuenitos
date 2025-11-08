@@ -3,7 +3,7 @@ import "../../css/Login.css";
 import PasswordInput from "../../components/PasswordInput";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom"; 
-import { login } from "../../api/authService";
+import { login, resetPassword } from "../../api/authService"; 
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -16,16 +16,45 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Recuperar contraseña
     if (isRecovering) {
+      if (!email || !newPassword || !confirmPassword) {
+        Swal.fire("Error", "Todos los campos son obligatorios", "error");
+        return;
+      }
+
       if (newPassword !== confirmPassword) {
         Swal.fire("Error", "Las contraseñas no coinciden", "error");
         return;
       }
-      Swal.fire("Listo", "Tu contraseña se actualizó correctamente.", "success");
-      setIsRecovering(false);
+
+      try {
+        const response = await resetPassword(email, newPassword, confirmPassword);
+
+        Swal.fire({
+          title: "✅ Contraseña actualizada",
+          text: response.message || "Tu contraseña se actualizó correctamente.",
+          icon: "success",
+          confirmButtonColor: "#2f6d6d",
+        }).then(() => {
+          setIsRecovering(false);
+          setPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        });
+      } catch (error) {
+        Swal.fire({
+          title: "❌ Error",
+          text: error.message || "No se pudo restablecer la contraseña.",
+          icon: "error",
+          confirmButtonColor: "#2f6d6d",
+        });
+      }
+
       return;
     }
 
+    // Inicio de sesión normal
     if (!email || !password) {
       Swal.fire("Error", "Debes ingresar tus credenciales", "error");
       return;
@@ -40,10 +69,15 @@ function Login() {
 
         // Redirección según el rol
         const rol = usuario.rol?.toLowerCase();
-        if (rol.includes("logística")) navigate("/recepcionrollos");
-        else if (rol.includes("operario")) navigate("/moldes");
-        else if (rol.includes("calidad")) navigate("/historialmoldes");
-        else navigate("/moldes");
+        if (rol.includes("logistica") || rol.includes("logística")) {
+          navigate("/moldes"); // Encargado de Logística
+        } else if (rol.includes("operario")) {
+          navigate("/aprobacionmarcadores"); // Operario de Corte
+        } else if (rol.includes("calidad")) {
+          navigate("/registrarinspeccion"); // Inspector de Calidad
+        } else {
+          navigate("/"); // Fallback (en caso de rol desconocido)
+        }
       });
     } catch (error) {
       Swal.fire("Error", error.message || "Ocurrió un error inesperado.", "error");
@@ -63,6 +97,7 @@ function Login() {
         <form onSubmit={handleSubmit}>
           {!isRecovering ? (
             <>
+              {/* --- LOGIN --- */}
               <label>Correo Electrónico</label>
               <input
                 type="email"
@@ -86,6 +121,7 @@ function Login() {
             </>
           ) : (
             <>
+              {/* --- RECUPERACIÓN DE CONTRASEÑA --- */}
               <label>Correo Electrónico</label>
               <input
                 type="email"

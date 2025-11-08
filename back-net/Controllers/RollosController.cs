@@ -21,6 +21,9 @@ namespace back_net.Controllers
         {
             public string TipoTela { get; set; } = default!;
             public decimal AnchoCm { get; set; }
+
+            public decimal AltoCm { get; set; }
+
             public string? Color { get; set; }
             public decimal MetrajeM { get; set; }
             public string? Proveedor { get; set; }
@@ -36,6 +39,8 @@ namespace back_net.Controllers
             if (nuevoRollo.MetrajeM <= 0)
                 return BadRequest(new { message = "El metraje debe ser mayor a 0." });
 
+
+            string estado = nuevoRollo.MetrajeM == 0 ? "agotado" : "disponible";
             // Obtener usuario autenticado
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             int? idUsuario = userIdClaim != null ? int.Parse(userIdClaim.Value) : (int?)null;
@@ -58,11 +63,12 @@ namespace back_net.Controllers
                 CodigoRollo = nuevoCodigo,
                 TipoTela = nuevoRollo.TipoTela,
                 AnchoCm = nuevoRollo.AnchoCm,
+                AltoCm = nuevoRollo.AltoCm,
                 Color = nuevoRollo.Color,
                 MetrajeM = nuevoRollo.MetrajeM,
                 Proveedor = nuevoRollo.Proveedor,
                 FechaRecepcion = DateTime.UtcNow,
-                Estado = "disponible",
+                Estado = estado,
                 IdUsuarioRegistro = idUsuario
             };
 
@@ -75,6 +81,7 @@ namespace back_net.Controllers
                 rollo.CodigoRollo,
                 rollo.TipoTela,
                 rollo.AnchoCm,
+                rollo.AltoCm,
                 rollo.Color,
                 rollo.MetrajeM,
                 rollo.Proveedor,
@@ -90,6 +97,7 @@ namespace back_net.Controllers
         public async Task<IActionResult> ListarRollos()
         {
             var rollos = await _context.RollosTelas
+                .Where(r => r.Estado == "disponible" || r.Estado == "agotado")
                 .Include(r => r.IdUsuarioRegistroNavigation)
                 .OrderByDescending(r => r.FechaRecepcion)
                 .Select(r => new
@@ -99,6 +107,7 @@ namespace back_net.Controllers
                     r.TipoTela,
                     r.Color,
                     r.AnchoCm,
+                    r.AltoCm,
                     r.MetrajeM,
                     r.Proveedor,
                     r.FechaRecepcion,
@@ -131,6 +140,7 @@ namespace back_net.Controllers
                 rollo.TipoTela,
                 rollo.Color,
                 rollo.AnchoCm,
+                rollo.AltoCm,
                 rollo.MetrajeM,
                 rollo.Proveedor,
                 rollo.FechaRecepcion,
@@ -140,21 +150,58 @@ namespace back_net.Controllers
         }
 
         // buscar por codigo
-        [HttpGet("buscar")]
+        [HttpGet("filtrar")]
         [Authorize(Policy = "SoloLogistica")]
-        public async Task<IActionResult> BuscarPorCodigo([FromQuery] string criterio)
+        public async Task<IActionResult> FiltrarRollos([FromQuery] string? campo, [FromQuery] string? criterio, [FromQuery] string? estado)
         {
-            if (string.IsNullOrWhiteSpace(criterio))
-                return BadRequest(new { message = "Debe ingresar un criterio de búsqueda (código, tipo, color o proveedor)." });
+            // Base query
+            var query = _context.RollosTelas.AsQueryable();
 
-            criterio = criterio.Trim().ToLower();
+            // Si hay criterio, aplica según el campo
+            if (!string.IsNullOrWhiteSpace(criterio))
+            {
+                string crit = criterio.Trim().ToLower();
 
-            var resultados = await _context.RollosTelas
-                .Where(r =>
-                    EF.Functions.ILike(r.CodigoRollo, $"%{criterio}%") ||
-                    EF.Functions.ILike(r.TipoTela, $"%{criterio}%") ||
-                    EF.Functions.ILike(r.Color ?? "", $"%{criterio}%") ||
-                    EF.Functions.ILike(r.Proveedor ?? "", $"%{criterio}%"))
+                switch (campo?.ToLower())
+                {
+                    case "codigo":
+                        query = query.Where(r => EF.Functions.ILike(r.CodigoRollo, $"%{crit}%"));
+                        break;
+                    case "metraje":
+                        if (decimal.TryParse(crit, out decimal m))
+                            query = query.Where(r => r.MetrajeM == m);
+                        break;
+                    case "color":
+                        query = query.Where(r => EF.Functions.ILike(r.Color ?? "", $"%{crit}%"));
+                        break;
+                    case "tipotela":
+                        query = query.Where(r => EF.Functions.ILike(r.TipoTela, $"%{crit}%"));
+                        break;
+                    case "ancho":
+                        if (decimal.TryParse(crit, out decimal a))
+                            query = query.Where(r => r.AnchoCm == a);
+                        break;
+                    case "proveedor":
+                        query = query.Where(r => EF.Functions.ILike(r.Proveedor ?? "", $"%{crit}%"));
+                        break;
+                    default:
+                        // Si no se especifica campo, busca en todos
+                        query = query.Where(r =>
+                            EF.Functions.ILike(r.CodigoRollo, $"%{crit}%") ||
+                            EF.Functions.ILike(r.TipoTela, $"%{crit}%") ||
+                            EF.Functions.ILike(r.Color ?? "", $"%{crit}%") ||
+                            EF.Functions.ILike(r.Proveedor ?? "", $"%{crit}%"));
+                        break;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(estado))
+            {
+                string est = estado.Trim().ToLower();
+                query = query.Where(r => r.Estado.ToLower() == est);
+            }
+
+            var resultados = await query
                 .OrderByDescending(r => r.FechaRecepcion)
                 .Select(r => new
                 {
@@ -163,18 +210,20 @@ namespace back_net.Controllers
                     r.TipoTela,
                     r.Color,
                     r.AnchoCm,
+                    r.AltoCm,
                     r.MetrajeM,
                     r.Proveedor,
-                    r.Estado,
-                    r.FechaRecepcion
+                    r.FechaRecepcion,
+                    r.Estado
                 })
                 .ToListAsync();
 
-            if (resultados == null || resultados.Count == 0)
-                return NotFound(new { message = "No se encontraron rollos con ese criterio." });
+            if (resultados.Count == 0)
+                return NotFound(new { message = "No se encontraron rollos con los filtros aplicados." });
 
             return Ok(resultados);
         }
+
 
         // DTO para edición
         public class UpdateRolloRequest
@@ -182,6 +231,7 @@ namespace back_net.Controllers
             public string? CodigoRollo { get; set; }
             public string? TipoTela { get; set; }
             public decimal? AnchoCm { get; set; }
+            public decimal? AltoCm { get; set; }
             public string? Color { get; set; }
             public decimal? MetrajeM { get; set; }
             public string? Proveedor { get; set; }
@@ -196,42 +246,33 @@ namespace back_net.Controllers
             if (rollo == null)
                 return NotFound(new { message = "Rollo no encontrado." });
 
-            // Validar duplicado de código si se cambia
-            if (!string.IsNullOrWhiteSpace(req.CodigoRollo) && req.CodigoRollo != rollo.CodigoRollo)
-            {
-                bool codigoExiste = await _context.RollosTelas
-                    .AnyAsync(r => r.CodigoRollo == req.CodigoRollo && r.IdRollo != id);
-                if (codigoExiste)
-                    return Conflict(new { message = "Ya existe un rollo con ese código." });
 
-                rollo.CodigoRollo = req.CodigoRollo.Trim();
-            }
-
-            // Actualizaciones parciales
             if (!string.IsNullOrWhiteSpace(req.TipoTela)) rollo.TipoTela = req.TipoTela.Trim();
             if (req.AnchoCm.HasValue) rollo.AnchoCm = req.AnchoCm.Value;
             if (req.Color != null) rollo.Color = string.IsNullOrWhiteSpace(req.Color) ? null : req.Color.Trim();
-            if (req.MetrajeM.HasValue) rollo.MetrajeM = req.MetrajeM.Value;
+            if (req.MetrajeM.HasValue)
+            {
+                rollo.MetrajeM = req.MetrajeM.Value;
+                rollo.Estado = req.MetrajeM.Value == 0 ? "agotado" : "disponible";
+            }
             if (req.Proveedor != null) rollo.Proveedor = string.IsNullOrWhiteSpace(req.Proveedor) ? null : req.Proveedor.Trim();
-            if (!string.IsNullOrWhiteSpace(req.Estado)) rollo.Estado = req.Estado.Trim();
+            if (req.AltoCm.HasValue) rollo.AltoCm = req.AltoCm.Value;
 
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 message = "Rollo actualizado correctamente.",
-                rollo = new
-                {
-                    rollo.IdRollo,
-                    rollo.CodigoRollo,
-                    rollo.TipoTela,
-                    rollo.AnchoCm,
-                    rollo.Color,
-                    rollo.MetrajeM,
-                    rollo.Proveedor,
-                    rollo.Estado,
-                    rollo.FechaRecepcion
-                }
+                rollo.IdRollo,
+                rollo.CodigoRollo,
+                rollo.TipoTela,
+                rollo.AnchoCm,
+                rollo.AltoCm,
+                rollo.Color,
+                rollo.MetrajeM,
+                rollo.Proveedor,
+                rollo.Estado,
+                rollo.FechaRecepcion
             });
         }
 
@@ -243,7 +284,8 @@ namespace back_net.Controllers
             if (rollo == null)
                 return NotFound(new { message = "Rollo no encontrado." });
 
-            rollo.Estado = "eliminado";
+            // Eliminar físico:
+            _context.RollosTelas.Remove(rollo);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Rollo eliminado correctamente." });

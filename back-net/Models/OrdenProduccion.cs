@@ -25,6 +25,8 @@ public partial class OrdenProduccion
 
     public string? Comentarios { get; set; }
 
+    public byte[]? ArchivoBlob { get; set; }
+
     public virtual ICollection<ComentariosOp> ComentariosOps { get; set; } = new List<ComentariosOp>();
 
     public virtual Usuario? IdUsuarioCreadorNavigation { get; set; }
