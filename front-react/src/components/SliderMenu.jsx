@@ -17,9 +17,7 @@ function SidebarMenu() {
     <ul>
       {rol === "Encargado de Logistica" && (
         <>
-          <li onClick={() => navigate("/moldes")}>
-            Gestión de Moldes
-          </li>
+          <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
           <li onClick={() => navigate("/historialmoldes")}>
             Historial de Moldes
           </li>
@@ -38,18 +36,33 @@ function SidebarMenu() {
         </>
       )}
 
-      {/* {rol === "Operario de Corte" && (
+      {rol === "Operario de Corte" && (
         <>
-          <li onClick={() => navigate("/producciondisponible")}>Ordenes de Produccion disponibles</li>
+          <li onClick={() => navigate("/aprobacionmarcadores")}>
+            Aprobación de Marcadores
+          </li>
+          <li onClick={() => navigate("/marcadordigitalv1")}>
+            Marcador Digital V1
+          </li>
+          <li onClick={() => navigate("/marcadordigitalv2")}>
+            Marcador Digital V2
+          </li>
+          <li onClick={() => navigate("/historialoptiope")}>
+            Historial de Optimizaciones
+          </li>
         </>
       )}
 
       {rol === "Inspector de Calidad" && (
         <>
-          <li onClick={() => navigate("/registrarinspeccion")}>Registrar Inspección</li>
-          <li onClick={() => navigate("/historialinspeccion")}>Historial de Inspecciones</li>
+          <li onClick={() => navigate("/registrarinspeccion")}>
+            Registrar Inspección
+          </li>
+          <li onClick={() => navigate("/historialinspeccion")}>
+            Historial de Inspección
+          </li>
         </>
-      )} */}
+      )}
     </ul>
   );
 }

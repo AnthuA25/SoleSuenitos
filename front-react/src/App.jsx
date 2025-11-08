@@ -7,9 +7,13 @@ import RecepcionRollos from "./pages/Rollos/RecepcionRollos.jsx";
 import HistorialRollos from "./pages/Rollos/HistorialRollos.jsx";
 import OrdenProduccion from "./pages/Optimizacion/OrdenProduccion.jsx";
 import HistorialOptimizaciones from "./pages/Optimizacion/HistorialOptimizaciones.jsx";
-import './css/Global.css' 
-
-
+import AprobacionMarcadores from "./pages/OperariodeCorte/AprobacionMarcadores.jsx";
+import MarcadorDigitalV1 from "./pages/OperariodeCorte/MarcadorDigitalV1.jsx";
+import MarcadorDigitalV2 from "./pages/OperariodeCorte/MarcadorDigitalV2.jsx";
+import HistorialOptimizacionesOperario from "./pages/OperariodeCorte/HistorialOptimizacionesope.jsx";
+import HistorialInspeccion from "./pages/InspectorCalidad/HistorialInspeccion.jsx";
+import RegistrarInspeccion from "./pages/InspectorCalidad/RegistrarInspeccion.jsx";
+import "./css/Global.css";
 
 function App() {
   return (
@@ -20,7 +24,7 @@ function App() {
 
         {/* vista de gestion de moldes*/}
         <Route path="/moldes" element={<GestionMoldes />} />
-        
+
         {/*vista de historial de moldes*/}
         <Route path="/historialmoldes" element={<HistorialMoldes />} />
 
@@ -33,11 +37,32 @@ function App() {
         {/*vista de Orden de Produccion*/}
         <Route path="/ordenproduccion" element={<OrdenProduccion />} />
 
-      {/*vista de Optimizacionv1*/}
-        {/* <Route path="/optimizacion" element={<Optimizacion />} />    */}
-
-      {/*vista de Historial de Optimizacion*/}
+        {/*vista de Historial de Optimizacion*/}
         <Route path="/historialopti" element={<HistorialOptimizaciones />} />
+
+        {/*vista de Aprobacion de Marcadores*/}
+        <Route
+          path="/aprobacionmarcadores"
+          element={<AprobacionMarcadores />}
+        />
+
+        {/*vista de Marcador Digital V1*/}
+        <Route path="/marcadordigitalv1" element={<MarcadorDigitalV1 />} />
+
+        {/*vista de Marcador Digital V2*/}
+        <Route path="/marcadordigitalv2" element={<MarcadorDigitalV2 />} />
+
+        {/*vista de Historial de Optimizacion Operario de Corte*/}
+        <Route
+          path="/historialoptiope"
+          element={<HistorialOptimizacionesOperario />}
+        />
+
+        {/*vista de Historial de Inspeccion*/}
+        <Route path="/historialinspeccion" element={<HistorialInspeccion />} />
+
+        {/*vista de Registrar Inspeccion*/}
+        <Route path="/registrarinspeccion" element={<RegistrarInspeccion />} />
       </Routes>
     </BrowserRouter>
   );

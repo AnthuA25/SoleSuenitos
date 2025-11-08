@@ -69,10 +69,15 @@ function Login() {
 
         // Redirección según el rol
         const rol = usuario.rol?.toLowerCase();
-        if (rol.includes("logística")) navigate("/recepcionrollos");
-        else if (rol.includes("operario")) navigate("/moldes");
-        else if (rol.includes("calidad")) navigate("/historialmoldes");
-        else navigate("/moldes");
+        if (rol.includes("logistica") || rol.includes("logística")) {
+          navigate("/moldes"); // Encargado de Logística
+        } else if (rol.includes("operario")) {
+          navigate("/aprobacionmarcadores"); // Operario de Corte
+        } else if (rol.includes("calidad")) {
+          navigate("/registrarinspeccion"); // Inspector de Calidad
+        } else {
+          navigate("/"); // Fallback (en caso de rol desconocido)
+        }
       });
     } catch (error) {
       Swal.fire("Error", error.message || "Ocurrió un error inesperado.", "error");
