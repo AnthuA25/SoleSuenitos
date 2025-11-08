@@ -6,63 +6,63 @@ import SidebarMenu from "../../components/SliderMenu";
 import UserHeader from "../../components/UserHeader";
 import { registrarRollo } from "../../api/rolloService";
 
-
 function RecepcionRollos() {
-
   const [tipoTela, setTipoTela] = useState("");
   const [ancho, setAncho] = useState("");
+  const [alto, setAlto] = useState("");
   const [color, setColor] = useState("");
   const [metraje, setMetraje] = useState("");
   const [proveedor, setProveedor] = useState("");
 
+  const handleGuardar = async (e) => {
+    e.preventDefault();
 
-const handleGuardar = async (e) => {
-  e.preventDefault();
+    // Validación de campos
+    if (!tipoTela || !ancho || !alto || !color || !metraje || !proveedor) {
+      Swal.fire({
+        title: "¡Error!",
+        text: "Por favor complete todos los campos",
+        icon: "error",
+        confirmButtonColor: "#2f6d6d",
+      });
+      return;
+    }
 
-  // Validación de campos
-  if (!tipoTela || !ancho || !color || !metraje || !proveedor) {
-    Swal.fire({
-      title: "¡Error!",
-      text: "Por favor complete todos los campos",
-      icon: "error",
-      confirmButtonColor: "#2f6d6d",
-    });
-    return;
-  }
+    try {
+      const nuevoRollo = {
+        tipoTela,
+        anchoCm: parseFloat(ancho),
+        altoCm: parseFloat(alto),
+        color,
+        metrajeM: parseFloat(metraje),
+        proveedor,
+      };
 
-  try {
-    const nuevoRollo = {
-      tipoTela,
-      anchoCm: parseFloat(ancho),
-      color,
-      metrajeM: parseFloat(metraje),
-      proveedor,
-    };
+      const response = await registrarRollo(nuevoRollo);
 
-    const response = await registrarRollo(nuevoRollo);
+      Swal.fire({
+        title: "Registro guardado",
+        text:
+          response.message || "La recepción del rollo se guardó correctamente.",
+        icon: "success",
+        confirmButtonColor: "#2f6d6d",
+      });
 
-    Swal.fire({
-      title: "Registro guardado",
-      text: response.message || "La recepción del rollo se guardó correctamente.",
-      icon: "success",
-      confirmButtonColor: "#2f6d6d",
-    });
-    
-    setTipoTela("");
-    setAncho("");
-    setColor("");
-    setMetraje("");
-    setProveedor("");
-  } catch (error) {
-    Swal.fire({
-      title: "❌ Error al registrar",
-      text: error.message || "No se pudo registrar el rollo.",
-      icon: "error",
-      confirmButtonColor: "#2f6d6d",
-    });
-  }
-};
-
+      setTipoTela("");
+      setAncho("");
+      setAlto("");
+      setColor("");
+      setMetraje("");
+      setProveedor("");
+    } catch (error) {
+      Swal.fire({
+        title: "❌ Error al registrar",
+        text: error.message || "No se pudo registrar el rollo.",
+        icon: "error",
+        confirmButtonColor: "#2f6d6d",
+      });
+    }
+  };
 
   return (
     <div className="gestion-container">
@@ -122,14 +122,28 @@ const handleGuardar = async (e) => {
               </div>
             </div>
 
-            <label>Metraje (m)</label>
-            <input
-              type="text"
-              value={metraje}
-              onChange={(e) => setMetraje(e.target.value)}
-              placeholder="Metraje"
-              style={{ backgroundColor: "transparent", color: "black" }}
-            />
+            <div className="gestion-ancho-color">
+              <div>
+                <label>Alto (cm)</label> {/* 👈 NUEVO CAMPO */}
+                <input
+                  type="text"
+                  value={alto}
+                  onChange={(e) => setAlto(e.target.value)}
+                  placeholder="Alto"
+                  style={{ backgroundColor: "transparent", color: "black" }}
+                />
+              </div>
+              <div>
+                <label>Metraje (m)</label>
+                <input
+                  type="text"
+                  value={metraje}
+                  onChange={(e) => setMetraje(e.target.value)}
+                  placeholder="Metraje"
+                  style={{ backgroundColor: "transparent", color: "black" }}
+                />
+              </div>
+            </div>
 
             <label>Proveedor</label>
             <input
@@ -147,6 +161,7 @@ const handleGuardar = async (e) => {
                   e.preventDefault();
                   setTipoTela("");
                   setAncho("");
+                  setAlto("");  
                   setColor("");
                   setMetraje("");
                   setProveedor("");
