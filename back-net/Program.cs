@@ -1,6 +1,6 @@
 using back_net.Configurations;
-
-
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +39,17 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
+var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "output");
+if (Directory.Exists(outputPath))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(outputPath),
+        RequestPath = "/output"
+    });
+}
 
 app.MapControllers();
 
