@@ -39,12 +39,12 @@ async def leer_piezas(archivo: UploadFile):
 @app.post("/optimize")
 async def optimize(
     archivo: UploadFile,
-    producto: str = Form("Polo"),
-    talla: str = Form("M"),
-    cantidad: int = Form(1),
-    ancho_rollo_mm: float = Form(1500),
-    largo_rollo_mm: float = Form(3000),
-    permitir_giro_90: bool = Form(True),
+    producto: str = Form(),
+    talla: str = Form(),
+    cantidad: int = Form(),
+    ancho_rollo_mm: float = Form(),
+    largo_rollo_mm: float = Form(),
+    permitir_giro_90: bool = Form(),
 ):
     tmp = f"_in_{archivo.filename}"
     with open(tmp, "wb") as f:
