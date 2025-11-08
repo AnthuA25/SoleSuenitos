@@ -144,6 +144,9 @@ namespace back_net.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("lista_para_entrega");
 
+                    b.Property<string>("NotaAdicional")
+                        .HasColumnType("text");
+
                     b.Property<string>("Observaciones")
                         .HasColumnType("text")
                         .HasColumnName("observaciones");
@@ -234,11 +237,8 @@ namespace back_net.Migrations
 
                     b.Property<string>("VersionMolde")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("version_molde")
-                        .HasDefaultValueSql("'v1'::character varying");
+                        .HasColumnType("character varying")
+                        .HasColumnName("version_molde");
 
                     b.HasKey("IdMolde")
                         .HasName("moldes_pkey");
@@ -270,6 +270,9 @@ namespace back_net.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("numeric(9,2)")
                         .HasColumnName("desperdicio_m");
+
+                    b.Property<bool>("EsOptimaFinal")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Estado")
                         .ValueGeneratedOnAdd()
@@ -307,6 +310,12 @@ namespace back_net.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("imagen_previsualizacion");
 
+                    b.Property<string>("MetricasJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NombreArchivoDxf")
+                        .HasColumnType("text");
+
                     b.Property<string>("NombreVersion")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
@@ -322,6 +331,9 @@ namespace back_net.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("orientacion_piezas")
                         .HasDefaultValueSql("'restringida'::character varying");
+
+                    b.Property<string>("RutaPngGenerado")
+                        .HasColumnType("text");
 
                     b.Property<decimal?>("TelaUtilizadaM")
                         .HasPrecision(9, 2)
@@ -358,6 +370,10 @@ namespace back_net.Migrations
                         .HasColumnName("id_op");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("IdOp"));
+
+                    b.Property<byte[]>("ArchivoBlob")
+                        .HasColumnType("bytea")
+                        .HasColumnName("archivo_blob");
 
                     b.Property<int>("Cantidad")
                         .HasColumnType("integer")
@@ -493,13 +509,17 @@ namespace back_net.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("IdRollo"));
 
+                    b.Property<decimal>("AltoCm")
+                        .HasPrecision(7, 2)
+                        .HasColumnType("numeric(7,2)")
+                        .HasColumnName("alto_cm");
+
                     b.Property<decimal>("AnchoCm")
                         .HasPrecision(7, 2)
                         .HasColumnType("numeric(7,2)")
                         .HasColumnName("ancho_cm");
 
                     b.Property<string>("CodigoRollo")
-                        .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)")
                         .HasColumnName("codigo_rollo");

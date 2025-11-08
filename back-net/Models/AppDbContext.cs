@@ -35,9 +35,9 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-//     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-// #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//         => optionsBuilder.UseNpgsql("Host=dpg-d3e4sb0gjchc738bhepg-a.oregon-postgres.render.com;Port=5432;Database=syscorte;Username=admin;Password=MQEpjFPpqZHSjgLwOUqnZjQAxY0bWD1q;Ssl Mode=Require;Trust Server Certificate=true");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=dpg-d4619dadbo4c7387emo0-a.oregon-postgres.render.com;Port=5432;Database=syscorte3;Username=admin;Password=6FUgw227bMqWlDALWgBcITVEyOIj1fR5;SSL Mode=Require;Trust Server Certificate=true;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -118,6 +118,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdOp).HasColumnName("id_op");
             entity.Property(e => e.IdUsuarioInspector).HasColumnName("id_usuario_inspector");
             entity.Property(e => e.ListaParaEntrega).HasColumnName("lista_para_entrega");
+            entity.Property(e => e.NotaAdicional).HasColumnName("nota_adicional");
             entity.Property(e => e.Observaciones).HasColumnName("observaciones");
             entity.Property(e => e.PiezasUnidas).HasColumnName("piezas_unidas");
             entity.Property(e => e.ResultadoFinal)
@@ -166,8 +167,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("nombre_molde");
             entity.Property(e => e.PesoBytes).HasColumnName("peso_bytes");
             entity.Property(e => e.VersionMolde)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("'v1'::character varying")
+                .HasColumnType("character varying")
                 .HasColumnName("version_molde");
 
             entity.HasOne(d => d.IdUsuarioSubidaNavigation).WithMany(p => p.Moldes)
@@ -193,6 +193,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.DesperdicioM)
                 .HasPrecision(9, 2)
                 .HasColumnName("desperdicio_m");
+            entity.Property(e => e.EsOptimaFinal)
+                .HasDefaultValue(false)
+                .HasColumnName("es_optima_final");
             entity.Property(e => e.Estado)
                 .HasMaxLength(40)
                 .HasDefaultValueSql("'generado'::character varying")
@@ -208,6 +211,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdMolde).HasColumnName("id_molde");
             entity.Property(e => e.IdOp).HasColumnName("id_op");
             entity.Property(e => e.ImagenPrevisualizacion).HasColumnName("imagen_previsualizacion");
+            entity.Property(e => e.MetricasJson).HasColumnName("metricas_json");
+            entity.Property(e => e.NombreArchivoDxf).HasColumnName("nombre_archivo_dxf");
             entity.Property(e => e.NombreVersion)
                 .HasMaxLength(100)
                 .HasColumnName("nombre_version");
@@ -216,6 +221,7 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValueSql("'restringida'::character varying")
                 .HasColumnName("orientacion_piezas");
+            entity.Property(e => e.RutaPngGenerado).HasColumnName("ruta_png_generado");
             entity.Property(e => e.TelaUtilizadaM)
                 .HasPrecision(9, 2)
                 .HasColumnName("tela_utilizada_m");
@@ -250,6 +256,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdOp)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id_op");
+            entity.Property(e => e.ArchivoBlob).HasColumnName("archivo_blob");
             entity.Property(e => e.Cantidad).HasColumnName("cantidad");
             entity.Property(e => e.CodigoOp)
                 .HasMaxLength(80)
@@ -336,6 +343,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IdRollo)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id_rollo");
+            entity.Property(e => e.AltoCm)
+                .HasPrecision(7, 2)
+                .HasColumnName("alto_cm");
             entity.Property(e => e.AnchoCm)
                 .HasPrecision(7, 2)
                 .HasColumnName("ancho_cm");

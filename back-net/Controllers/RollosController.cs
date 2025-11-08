@@ -22,6 +22,8 @@ namespace back_net.Controllers
             public string TipoTela { get; set; } = default!;
             public decimal AnchoCm { get; set; }
 
+            public decimal AltoCm { get; set; }
+
             public string? Color { get; set; }
             public decimal MetrajeM { get; set; }
             public string? Proveedor { get; set; }
@@ -61,6 +63,7 @@ namespace back_net.Controllers
                 CodigoRollo = nuevoCodigo,
                 TipoTela = nuevoRollo.TipoTela,
                 AnchoCm = nuevoRollo.AnchoCm,
+                AltoCm = nuevoRollo.AltoCm,
                 Color = nuevoRollo.Color,
                 MetrajeM = nuevoRollo.MetrajeM,
                 Proveedor = nuevoRollo.Proveedor,
@@ -78,6 +81,7 @@ namespace back_net.Controllers
                 rollo.CodigoRollo,
                 rollo.TipoTela,
                 rollo.AnchoCm,
+                rollo.AltoCm,
                 rollo.Color,
                 rollo.MetrajeM,
                 rollo.Proveedor,
@@ -103,6 +107,7 @@ namespace back_net.Controllers
                     r.TipoTela,
                     r.Color,
                     r.AnchoCm,
+                    r.AltoCm,
                     r.MetrajeM,
                     r.Proveedor,
                     r.FechaRecepcion,
@@ -135,6 +140,7 @@ namespace back_net.Controllers
                 rollo.TipoTela,
                 rollo.Color,
                 rollo.AnchoCm,
+                rollo.AltoCm,
                 rollo.MetrajeM,
                 rollo.Proveedor,
                 rollo.FechaRecepcion,
@@ -204,6 +210,7 @@ namespace back_net.Controllers
                     r.TipoTela,
                     r.Color,
                     r.AnchoCm,
+                    r.AltoCm,
                     r.MetrajeM,
                     r.Proveedor,
                     r.FechaRecepcion,
@@ -224,6 +231,7 @@ namespace back_net.Controllers
             public string? CodigoRollo { get; set; }
             public string? TipoTela { get; set; }
             public decimal? AnchoCm { get; set; }
+            public decimal? AltoCm { get; set; }
             public string? Color { get; set; }
             public decimal? MetrajeM { get; set; }
             public string? Proveedor { get; set; }
@@ -248,6 +256,7 @@ namespace back_net.Controllers
                 rollo.Estado = req.MetrajeM.Value == 0 ? "agotado" : "disponible";
             }
             if (req.Proveedor != null) rollo.Proveedor = string.IsNullOrWhiteSpace(req.Proveedor) ? null : req.Proveedor.Trim();
+            if (req.AltoCm.HasValue) rollo.AltoCm = req.AltoCm.Value;
 
             await _context.SaveChangesAsync();
 
@@ -258,6 +267,7 @@ namespace back_net.Controllers
                 rollo.CodigoRollo,
                 rollo.TipoTela,
                 rollo.AnchoCm,
+                rollo.AltoCm,
                 rollo.Color,
                 rollo.MetrajeM,
                 rollo.Proveedor,

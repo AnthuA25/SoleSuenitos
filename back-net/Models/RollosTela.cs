@@ -7,7 +7,7 @@ public partial class RollosTela
 {
     public int IdRollo { get; set; }
 
-    public string CodigoRollo { get; set; } = null!;
+    public string? CodigoRollo { get; set; }
 
     public string TipoTela { get; set; } = null!;
 
@@ -24,6 +24,8 @@ public partial class RollosTela
     public int? IdUsuarioRegistro { get; set; }
 
     public string? Estado { get; set; }
+
+    public decimal AltoCm { get; set; }
 
     public virtual Usuario? IdUsuarioRegistroNavigation { get; set; }
 

@@ -39,6 +39,14 @@ public partial class Optimizacione
 
     public string? OrientacionPiezas { get; set; }
 
+    public string? NombreArchivoDxf { get; set; }
+
+    public string? RutaPngGenerado { get; set; }
+
+    public string? MetricasJson { get; set; }
+
+    public bool? EsOptimaFinal { get; set; }
+
     public virtual ICollection<AnotacionesOpt> AnotacionesOpts { get; set; } = new List<AnotacionesOpt>();
 
     public virtual Usuario? GeneradoPorNavigation { get; set; }
