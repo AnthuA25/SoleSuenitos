@@ -1,89 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
 import UserHeader from "../../components/UserHeader";
+import {
+  eliminarOrdenProduccion,
+  listarOptimizaciones,
+  obtenerDetalleOptimizacion,
+} from "../../api/ordenProducciónService";
+import SidebarMenu from "../../components/SliderMenu";
 
 function HistorialOptimizaciones() {
-  const navigate = useNavigate();
+  const [optimizaciones, setOptimizaciones] = useState([]);
 
-  // Estado del usuario y menú
-  const user = { nombre: "Sole Sueñitos" };
-  const userInicial = user.nombre.charAt(0).toUpperCase();
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  useEffect(() => {
+    cargarOptimizaciones();
+  }, []);
 
-  // Estado de optimizaciones (datos simulados)
-  const [optimizaciones, setOptimizaciones] = useState([
-    {
-      id: 1,
-      modelo: "Pijama invierno",
-      talla: "M",
-      fecha: "2025-10-15",
-      telaUtilizada: "3.2 m",
-      aprovechamiento: "92%",
-      desperdicio: "8%",
-    },
-    {
-      id: 2,
-      modelo: "Polo clásico",
-      talla: "L",
-      fecha: "2025-10-10",
-      telaUtilizada: "2.7 m",
-      aprovechamiento: "88%",
-      desperdicio: "12%",
-    },
-  ]);
-
-  // Cerrar sesión
-  const handleLogout = () => {
-    Swal.fire({
-      title: "¿Cerrar sesión?",
-      text: "¿Estás seguro de que quieres salir del sistema?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#2f6d6d",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, cerrar sesión",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: "Sesión cerrada",
-          text: "Has cerrado sesión correctamente",
-          icon: "success",
+  const cargarOptimizaciones = async () => {
+    try {
+      const data = await listarOptimizaciones();
+      setOptimizaciones(data);
+    } catch (error) {
+      Swal.fire({
+        title: "Error al cargar optimizaciones",
+        text: error.message || "No se pudieron obtener las optimizaciones.",
+        icon: "error",
           confirmButtonColor: "#2f6d6d",
-          timer: 2000,
-          showConfirmButton: false,
-        }).then(() => {
-          navigate("/");
-        });
-      }
-    });
+      });
+    }
   };
 
   // Ver detalles
-  const handleVerDetalles = (opt) => {
-    Swal.fire({
-      title: `<strong>Detalles de Optimización</strong>`,
-      html: `
-        <div style="text-align:left; font-size:15px;">
-          <p><b>Modelo:</b> ${opt.modelo}</p>
-          <p><b>Talla:</b> ${opt.talla}</p>
-          <p><b>Fecha:</b> ${opt.fecha}</p>
-          <p><b>Tela utilizada:</b> ${opt.telaUtilizada}</p>
-          <p><b>Aprovechamiento:</b> ${opt.aprovechamiento}</p>
-          <p><b>Desperdicio:</b> ${opt.desperdicio}</p>
-        </div>
-      `,
-      confirmButtonText: "Cerrar",
-      confirmButtonColor: "#204e4e",
-      background: "#f7f7f7",
-    });
+  const handleVerDetalles = async (opt) => {
+    try {
+      const detalle = await obtenerDetalleOptimizacion(opt.idOpt || opt.IdOpt);
+      Swal.fire({
+        title: `<strong>Detalles de Optimización</strong>`,
+        html: `
+          <div style="text-align:left; font-size:15px;">
+            <p><b>Código OP:</b> ${detalle.codigoOp ?? "-"}</p>
+            <p><b>Modelo:</b> ${detalle.modelo}</p>
+            <p><b>Talla:</b> ${detalle.talla}</p>
+            <p><b>Versión:</b> ${detalle.nombreVersion}</p>
+            <p><b>Tela utilizada:</b> ${
+              detalle.telaUtilizadaM?.toFixed(2) ?? "-"
+            } m</p>
+          <p><b>Aprovechamiento:</b> ${
+            detalle.aprovechamientoPorcent?.toFixed(2) ?? "-"
+          } %</p>
+          <p><b>Desperdicio:</b> ${
+            detalle.desperdicioM?.toFixed(2) ?? "-"
+          } %</p>
+            <p><b>Fecha:</b> ${new Date(
+              detalle.FechaGeneracion
+            ).toLocaleString()}</p>
+          </div>
+        `,
+        confirmButtonText: "Cerrar",
+        confirmButtonColor: "#204e4e",
+      });
+    } catch {
+      Swal.fire("Error", "No se pudieron obtener los detalles.", "error");
+    }
   };
 
   // Eliminar optimización
-  const handleEliminar = (id) => {
+  const handleEliminar = async (idOpt) => {
     Swal.fire({
       title: "¿Eliminar optimización?",
       text: "Esta acción no se puede deshacer.",
@@ -93,15 +76,29 @@ function HistorialOptimizaciones() {
       cancelButtonColor: "#204e4e",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setOptimizaciones(optimizaciones.filter((o) => o.id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Eliminado",
-          text: "La optimización fue eliminada correctamente.",
-          confirmButtonColor: "#204e4e",
-        });
+        try {
+          await eliminarOrdenProduccion(idOpt); 
+
+          setOptimizaciones((prev) => prev.filter((o) => o.idOpt !== idOpt));
+
+          Swal.fire({
+            icon: "success",
+            title: "Eliminado",
+            text: "La optimización fue eliminada correctamente.",
+            confirmButtonColor: "#204e4e",
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text:
+              error.response?.data?.message ||
+              "No se pudo eliminar la optimización.",
+            confirmButtonColor: "#204e4e",
+          });
+        }
       }
     });
   };
@@ -120,16 +117,7 @@ function HistorialOptimizaciones() {
             </div>
           </div>
 
-          <ul>
-            <li onClick={() => navigate("/moldes")}>Gestión de Moldes</li>
-            <li onClick={() => navigate("/historialmoldes")}>Historial de Moldes</li>
-            <li onClick={() => navigate("/recepcionrollos")}>Recepción de Rollos</li>
-            <li onClick={() => navigate("/historialrollos")}>Historial de Rollos</li>
-            <li onClick={() => navigate("/ordenproduccion")}>Orden de Producción</li>
-            <li>
-              Historial de Optimización
-            </li>
-          </ul>
+          <SidebarMenu />
         </div>
 
         {/* CONTENIDO */}
@@ -137,9 +125,9 @@ function HistorialOptimizaciones() {
           {/* HEADER SUPERIOR CON USUARIO */}
           <div className="gestion-header">
             {/* HEADER superior */}
-          <div className="gestion-header">
-            <UserHeader nombreUsuario="Sole Sueñitos" />
-          </div>
+            <div className="gestion-header">
+              <UserHeader nombreUsuario="Sole Sueñitos" />
+            </div>
           </div>
 
           {/* TÍTULO */}
@@ -172,24 +160,30 @@ function HistorialOptimizaciones() {
                 <table className="orden-table">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>Código</th>
                       <th>Modelo</th>
                       <th>Talla</th>
                       <th>Fecha</th>
+                      <th>Versión</th>
                       <th>Aprovechamiento</th>
                       <th>Desperdicio</th>
+                      <th>Tela Utilizada</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {optimizaciones.map((opt) => (
-                      <tr key={opt.id}>
-                        <td>{opt.id}</td>
+                      <tr key={opt.idOpt}>
+                        <td>{opt.codigoOp}</td>
                         <td>{opt.modelo}</td>
                         <td>{opt.talla}</td>
-                        <td>{opt.fecha}</td>
-                        <td>{opt.aprovechamiento}</td>
-                        <td>{opt.desperdicio}</td>
+                        <td>{new Date(opt.fecha).toLocaleDateString()}</td>
+                        <td>{opt.nombreVersion || "-"}</td>
+                        <td>
+                          {opt.aprovechamientoPorcent?.toFixed(2) ?? "-"} %
+                        </td>
+                        <td>{opt.desperdicioM?.toFixed(2) ?? "-"} %</td>
+                        <td>{opt.telaUtilizadaM?.toFixed(2) ?? "-"} m</td>
                         <td
                           style={{
                             display: "flex",
@@ -210,8 +204,9 @@ function HistorialOptimizaciones() {
                               padding: "6px 12px",
                               background: "#c0392b",
                               border: "none",
+                              color: "#fff",
                             }}
-                            onClick={() => handleEliminar(opt.id)}
+                            onClick={() => handleEliminar(opt.idOpt)}
                           >
                             Eliminar
                           </button>

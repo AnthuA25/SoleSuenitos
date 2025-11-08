@@ -23,7 +23,7 @@ namespace back_net.Controllers
         }
 
         // =====================
-        // 🔹 1. Leer piezas del DXF
+        // Leer piezas del DXF
         // =====================
         [HttpPost("leer-piezas")]
         [Authorize(Policy = "SoloLogistica")]
@@ -51,7 +51,7 @@ namespace back_net.Controllers
         }
 
         // =====================
-        // 🔹 2. Crear o recuperar orden existente
+        // Crear o recuperar orden existente
         // =====================
         private async Task<OrdenProduccion> ObtenerOCrearOrdenAsync(string modelo, string talla, int cantidad, List<int> rollos)
         {
@@ -92,7 +92,7 @@ namespace back_net.Controllers
         }
 
         // =====================
-        // 🔹 3. Generar marcador (V1 / V2 / Comparada)
+        // Generar marcador (V1 / V2 / Comparada)
         // =====================
         [HttpPost("generar-v1")]
         [Authorize(Policy = "SoloLogistica")]
@@ -149,7 +149,103 @@ namespace back_net.Controllers
         }
 
         // =====================
-        // 🔹 Helper general para V1/V2/Comparada
+        // Listar optimizaciones registradas
+        // =====================
+        [HttpGet("listar-optimizaciones")]
+        [Authorize(Policy = "SoloLogistica")]
+        public async Task<IActionResult> ListarOptimizaciones()
+        {
+            try
+            {
+                var lista = await _context.Optimizaciones
+                    .Include(o => o.IdOpNavigation)
+                    .Select(o => new
+                    {
+                        o.IdOpt,
+                        CodigoOp = o.IdOpNavigation.CodigoOp,
+                        Modelo = o.IdOpNavigation.Modelo,
+                        Talla = o.IdOpNavigation.Talla,
+                        Fecha = o.FechaGeneracion,
+                        o.NombreVersion,
+                        o.AprovechamientoPorcent,
+                        o.DesperdicioM,
+                        o.TelaUtilizadaM,
+                        o.Estado
+                    })
+                    .OrderByDescending(o => o.Fecha)
+                    .ToListAsync();
+
+                return Ok(lista);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error al listar optimizaciones: {ex.Message}" });
+            }
+        }
+
+        // =====================
+        // Ver detalles de una optimización
+        // =====================
+        [HttpGet("detalle-optimizacion/{id}")]
+        [Authorize(Policy = "SoloLogistica")]
+        public async Task<IActionResult> ObtenerDetalleOptimizacion(int id)
+        {
+            try
+            {
+                var opt = await _context.Optimizaciones
+                    .Include(o => o.IdOpNavigation)
+                    .FirstOrDefaultAsync(o => o.IdOpt == id);
+
+                if (opt == null)
+                    return NotFound(new { message = "Optimización no encontrada" });
+
+                return Ok(new
+                {
+                    opt.IdOpt,
+                    opt.IdOpNavigation.CodigoOp,
+                    Modelo = opt.IdOpNavigation.Modelo,
+                    opt.IdOpNavigation.Talla,
+                    opt.NombreVersion,
+                    opt.AprovechamientoPorcent,
+                    opt.DesperdicioM,
+                    opt.TelaUtilizadaM,
+                    opt.MetricasJson,
+                    opt.RutaPngGenerado,
+                    opt.FechaGeneracion
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error al obtener detalles: {ex.Message}" });
+            }
+        }
+        // =====================
+        // Eliminar optimización
+        // =====================
+        [HttpDelete("eliminar-optimizacion/{id}")]
+        [Authorize(Policy = "SoloLogistica")]
+        public async Task<IActionResult> EliminarOptimizacion(int id)
+        {
+            try
+            {
+                var opt = await _context.Optimizaciones.FindAsync(id);
+                if (opt == null)
+                    return NotFound(new { message = "Optimización no encontrada" });
+
+                _context.Optimizaciones.Remove(opt);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Optimización eliminada correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error al eliminar: {ex.Message}" });
+            }
+        }
+
+
+        // =====================
+        // Helper general para V1/V2/Comparada
         // =====================
         private async Task<IActionResult> GenerarOptimizacion(
             string version, string endpoint, string modelo, string talla, int cantidad,
@@ -182,7 +278,7 @@ namespace back_net.Controllers
         }
 
         // =====================
-        // 🔹 4. Llamar microservicio Python
+        // Llamar microservicio Python
         // =====================
         private async Task<JsonElement> LlamarMicroservicioAsync(
             string endpoint, IFormFile archivo, string modelo, string talla, int cantidad,
@@ -209,7 +305,7 @@ namespace back_net.Controllers
         }
 
         // =====================
-        // 🔹 5. Guardar optimización en BD
+        // Guardar optimización en BD
         // =====================
         private async Task GuardarOptimizacionAsync(OrdenProduccion orden, IFormFile archivo, JsonElement result, string version)
         {
@@ -247,7 +343,7 @@ namespace back_net.Controllers
                 }
                 else
                 {
-                    // 🆕 Si no existe, creamos una nueva
+                    // Si no existe, creamos una nueva
                     var opt = new Optimizacione
                     {
                         IdOp = orden.IdOp,
@@ -276,7 +372,7 @@ namespace back_net.Controllers
 
 
         // =====================
-        // 🔹 6. Actualizar metraje de rollo y orden
+        // Actualizar metraje de rollo y orden
         // =====================
         private void ActualizarRolloYOrden(RollosTela rollo, OrdenProduccion orden, JsonElement result)
         {
@@ -298,7 +394,7 @@ namespace back_net.Controllers
 
 
         // =====================
-        // 🔹 7. Generar código único (OP-01, OP-02...)
+        // Generar código único (OP-01, OP-02...)
         // =====================
         private string GenerarCodigoOrden()
         {
