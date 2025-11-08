@@ -1,4 +1,4 @@
-# core/optimizer.py
+# core/optimizer_v2.py
 from typing import List, Dict
 from shapely.geometry import Polygon
 from shapely.affinity import translate, rotate
@@ -9,31 +9,37 @@ def _bbox(poly: Polygon):
     return maxx - minx, maxy - miny
 
 def _colisiona(nuevo_poly, colocadas):
-    """Verifica si una pieza se superpone con alguna ya colocada."""
     for p in colocadas:
         if nuevo_poly.intersects(p["polygon"]):
             return True
     return False
 
-def generar_layout(piezas: List[Dict], ancho_rollo: float, largo_rollo: float, permitir_giro_90: bool = True):
+def generar_layout_v2(piezas: List[Dict], ancho_rollo: float, largo_rollo: float):
+    """
+    Versión 2 del marcador digital (optimización geométrica con rotaciones múltiples).
+    """
     piezas = sorted(piezas, key=lambda p: p["polygon"].area, reverse=True)
-
     colocadas = []
-    y_actual = 0.0
-    paso = 50.0  # espaciado de búsqueda (mm)
-    angulos = [0, 90] if permitir_giro_90 else [0]
+
+    paso = 20  # mm
+    angulos = np.arange(0, 180, 10)
 
     for pieza in piezas:
-        colocada = None
+        mejor_colocacion = None
+        menor_y = float("inf")
+
         for ang in angulos:
             rotada = rotate(pieza["polygon"], ang, origin="centroid", use_radians=False)
             w, h = _bbox(rotada)
 
-            for y in np.arange(y_actual, largo_rollo - h, paso):
+            for y in np.arange(0, largo_rollo - h, paso):
                 for x in np.arange(0, ancho_rollo - w, paso):
                     movida = translate(rotada, xoff=x, yoff=y)
-                    if not _colisiona(movida, colocadas):
-                        colocada = {
+                    if _colisiona(movida, colocadas):
+                        continue
+                    if y < menor_y:
+                        menor_y = y
+                        mejor_colocacion = {
                             "nombre": pieza["nombre"],
                             "polygon": movida,
                             "orientacion_deg": ang,
@@ -41,17 +47,14 @@ def generar_layout(piezas: List[Dict], ancho_rollo: float, largo_rollo: float, p
                             "alto_mm": h,
                             "area_mm2": movida.area
                         }
-                        colocadas.append(colocada)
-                        break
-                if colocada:
+                if mejor_colocacion:
                     break
-            if colocada:
-                break
 
-        if not colocada:
+        if mejor_colocacion:
+            colocadas.append(mejor_colocacion)
+        else:
             raise ValueError(f"No se pudo colocar la pieza {pieza['nombre']} dentro del rollo.")
 
-    # Calcular métricas
     max_y = max(p["polygon"].bounds[3] for p in colocadas)
     area_piezas = sum(p["polygon"].area for p in colocadas)
     area_usada = ancho_rollo * max_y
@@ -59,6 +62,8 @@ def generar_layout(piezas: List[Dict], ancho_rollo: float, largo_rollo: float, p
 
     metricas = {
         "largo_usado_mm": round(max_y, 2),
+        "area_piezas_mm2": round(area_piezas, 2),
+        "area_rollo_usado_mm2": round(area_usada, 2),
         "aprovechamiento_porcentaje": round(aprovechamiento * 100, 2),
         "desperdicio_porcentaje": round((1 - aprovechamiento) * 100, 2)
     }
