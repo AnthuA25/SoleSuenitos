@@ -1,22 +1,27 @@
 using back_net.Configurations;
-
-
+using System.Text.Json.Serialization; // 👈 necesario para ReferenceHandler
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Configuración modular
 builder.Services.AddDatabase();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddRolePolicies();
 
-//  Registrar HttpClient (para comunicar con Python)
+// Registrar HttpClient (para comunicar con Python)
 builder.Services.AddHttpClient();
 
-// controladores
-builder.Services.AddControllers();
+// Controladores con JSON configurado para ignorar ciclos
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = null; // opcional: mantiene nombres originales
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -41,6 +46,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 app.Run();
