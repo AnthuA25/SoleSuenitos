@@ -41,14 +41,32 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseStaticFiles();
-var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "output");
-if (Directory.Exists(outputPath))
+
+var backendOutput = Path.Combine(Directory.GetCurrentDirectory(), "output");
+if (Directory.Exists(backendOutput))
 {
     app.UseStaticFiles(new StaticFileOptions
     {
-        FileProvider = new PhysicalFileProvider(outputPath),
+        FileProvider = new PhysicalFileProvider(backendOutput),
         RequestPath = "/output"
     });
+    Console.WriteLine($"🟢 Sirviendo archivos desde: {backendOutput}");
+}
+
+
+var pythonOutput = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.FullName, "motor-optimization", "output");
+if (Directory.Exists(pythonOutput))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(pythonOutput),
+        RequestPath = "/output"
+    });
+    Console.WriteLine($"🟢 Sirviendo archivos de Python desde: {pythonOutput}");
+}
+else
+{
+    Console.WriteLine("⚠️ No se encontró la carpeta 'motor-optimization/output'.");
 }
 
 app.MapControllers();

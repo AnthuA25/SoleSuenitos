@@ -269,6 +269,17 @@ namespace back_net.Controllers
                 await GuardarOptimizacionAsync(orden, archivoMolde, result, version);
                 ActualizarRolloYOrden(rollo, orden, result);
 
+
+                var jsonStr = JsonSerializer.Serialize(result);
+                using var doc = JsonDocument.Parse(jsonStr);
+                var root = doc.RootElement;
+
+                // Leer propiedades del microservicio
+                string png = root.TryGetProperty("png", out var pngProp) ? pngProp.GetString() ?? "" : "";
+                JsonElement metricas = default;
+                if (root.TryGetProperty("metricas", out var mProp))
+                    metricas = mProp;
+
                 return Ok(new { message = $"Versión {version} generada correctamente", data = result });
             }
             catch (Exception ex)
@@ -325,7 +336,15 @@ namespace back_net.Controllers
                 await archivo.CopyToAsync(ms);
                 var archivoBytes = ms.ToArray();
 
-                string? rutaPng = result.TryGetProperty("png", out var pngProp) ? pngProp.GetString() : null;
+                string? rutaPng = null;
+                if (result.TryGetProperty("png", out var pngProp))
+                {
+                    var rutaCompleta = pngProp.GetString();
+                    var archivop = Path.GetFileName(rutaCompleta); // solo el nombre
+                    rutaPng = $"output/{archivop}"; // ruta relativa
+                    Console.WriteLine($"🟢 Ruta PNG guardada: {rutaPng}");
+                }
+
                 string? metricas = result.TryGetProperty("metricas", out var metricasProp) ? metricasProp.ToString() : null;
 
                 if (existente != null)

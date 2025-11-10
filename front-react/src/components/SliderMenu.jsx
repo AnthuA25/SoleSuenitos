@@ -38,7 +38,7 @@ function SidebarMenu() {
 
       {rol === "Operario de Corte" && (
         <>
-          <li onClick={() => navigate("/aprobacionmarcadores")}>
+          <li onClick={() => navigate("/OrdenesDisponiblesope")}>
             Aprobación de Marcadores
           </li>
           <li onClick={() => navigate("/marcadordigitalv1")}>

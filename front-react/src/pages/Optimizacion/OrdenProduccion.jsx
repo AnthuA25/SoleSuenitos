@@ -208,10 +208,16 @@ function OrdenProduccion() {
       const result = await generarV1(formData);
       Swal.close();
 
-      const data = result.data.data;
+      const data = result.data ? result.data : result;
+      console.log("Datos de optimización V1:", data);
       const metricas = data.metricas;
-      const imageUrl = data.png.replace(/\\/g, "/");
-      console.log(imageUrl)
+      console.log("m", metricas);
+
+      const baseUrl =
+        import.meta.env.VITE_API_URL?.replace("/api", "") ||
+        "http://localhost:5247";
+      const imageUrl = `${baseUrl}/${encodeURI(data.png.replace(/\\/g, "/"))}`;
+      console.log("Marcador generado:", imageUrl);
       setOptValues({
         telaUtilizada: `${(metricas.largo_usado_mm / 1000).toFixed(2)} m`,
         aprovechamiento: `${metricas.aprovechamiento_porcentaje.toFixed(2)}%`,
@@ -259,11 +265,30 @@ function OrdenProduccion() {
       const result = await generarV2(formData);
       Swal.close();
 
-      const m = result.data.metricas;
+      const data = result?.data ?? result;
+      const pngPath = data?.png || data?.data?.png;
+      const m = data?.metricas || data?.data?.metricas;
+
+      // 🧩 Validación extra
+      if (!pngPath) {
+        Swal.fire(
+          "Error",
+          "El microservicio no devolvió una imagen (png).",
+          "error"
+        );
+        return;
+      }
+
+      const baseUrl =
+        import.meta.env.VITE_API_URL?.replace("/api", "") ||
+        "http://localhost:5247";
+      const imageUrl = `${baseUrl}/${encodeURI(data.png.replace(/\\/g, "/"))}`;
+      console.log("Marcador generado:", imageUrl);
       setOptValuesV2({
         telaUtilizada: `${(m.largo_usado_mm / 1000).toFixed(2)} m`,
         aprovechamiento: `${m.aprovechamiento_porcentaje.toFixed(2)}%`,
         desperdicio: `${m.desperdicio_porcentaje.toFixed(2)}%`,
+        imagen: imageUrl,
       });
 
       setShowOptimizacion(false);
@@ -484,26 +509,36 @@ function OrdenProduccion() {
           ) : showOptimizacion ? (
             <>
               <h1>Optimización V1</h1>
-              <div className="optimizacion-box">
+              <div
+                style={{
+                  background: "#204e4eff",
+                  padding: 50,
+                  borderRadius: 10,
+                  width: "80%",
+                  maxWidth: 600,
+                  borderBlockColor: "grey",
+                }}
+              >
+                {console.log("Renderizando métricas:", optValues)}
                 <table>
                   <tbody>
                     <tr>
                       <td>
                         <b>Tela utilizada:</b>
                       </td>
-                      <td>{optValues.telaUtilizadaM}</td>
+                      <td>{optValues.telaUtilizada}</td>
                     </tr>
                     <tr>
                       <td>
                         <b>Aprovechamiento:</b>
                       </td>
-                      <td>{optValues.aprovechamientoPorcent}</td>
+                      <td>{optValues.aprovechamiento}</td>
                     </tr>
                     <tr>
                       <td>
                         <b>Desperdicio:</b>
                       </td>
-                      <td>{optValues.desperdicioM}</td>
+                      <td>{optValues.desperdicio}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -541,7 +576,16 @@ function OrdenProduccion() {
           ) : showMarcadorV2 ? (
             <>
               <h1>Optimización V2</h1>
-              <div className="optimizacion-box">
+              <div
+                style={{
+                  background: "#204e4eff",
+                  padding: 50,
+                  borderRadius: 10,
+                  width: "80%",
+                  maxWidth: 600,
+                  borderBlockColor: "grey",
+                }}
+              >
                 <table>
                   <tbody>
                     <tr>

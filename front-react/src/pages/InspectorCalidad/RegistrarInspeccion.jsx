@@ -125,9 +125,9 @@ export default function RegistrarInspeccion() {
           </p>
 
           <div className="info-op-box">
-            <p><strong>Código OP:</strong> OP-2025-002</p>
-            <p><strong>Producto:</strong> Polo de Algodón</p>
-            <p><strong>Cantidad:</strong> 150 prendas</p>
+          <p style={{ color: '#000' }}><strong>Código OP:</strong> OP-2025-002</p>
+  <p style={{ color: '#000' }}><strong>Producto:</strong> Polo de Algodón</p>
+<p style={{ color: '#000' }}><strong>Cantidad:</strong> 150 prendas</p>
           </div>
 
           <table className="tabla-inspeccion">

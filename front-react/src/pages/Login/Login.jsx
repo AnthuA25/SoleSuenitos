@@ -72,7 +72,7 @@ function Login() {
         if (rol.includes("logistica") || rol.includes("logística")) {
           navigate("/moldes"); // Encargado de Logística
         } else if (rol.includes("operario")) {
-          navigate("/aprobacionmarcadores"); // Operario de Corte
+          navigate("/OrdenesDisponiblesope"); // Operario de Corte
         } else if (rol.includes("calidad")) {
           navigate("/registrarinspeccion"); // Inspector de Calidad
         } else {
