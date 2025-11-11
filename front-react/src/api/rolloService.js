@@ -1,5 +1,21 @@
 import api from "../api/axiosConfig";
 
+
+const mapRollo = (r) => ({
+  idRollo: r.IdRollo,
+  codigoRollo: r.CodigoRollo,
+  tipoTela: r.TipoTela,
+  color: r.Color,
+  anchoCm: r.AnchoCm,
+  altoCm: r.AltoCm,
+  metrajeM: r.MetrajeM,
+  proveedor: r.Proveedor,
+  fechaRecepcion: r.FechaRecepcion,
+  estado: r.Estado,
+  usuarioRegistro: r.UsuarioRegistro,
+});
+
+
 export const registrarRollo = async (rollo) => {
   try {
     const response = await api.post("/rollos/registrar", rollo, {
@@ -17,7 +33,7 @@ export const registrarRollo = async (rollo) => {
 export const listarRollos = async () => {
   try {
     const response = await api.get("/rollos/listar", { withCredentials: true });
-    return response.data;
+    return response.data.map(mapRollo);
   } catch (error) {
     console.error("Error en listarRollos:", error);
     throw error.response
@@ -29,7 +45,7 @@ export const listarRollos = async () => {
 export const obtenerRolloPorId = async (id) => {
   try {
     const response = await api.get(`/rollos/${id}`, { withCredentials: true });
-    return response.data;
+    return mapRollo(response.data);
   } catch (error) {
     console.error("Error en obtenerRolloPorId:", error);
     throw error.response ? error.response.data : { message: "Error desconocido" };
@@ -46,7 +62,7 @@ export const filtrarRollos = async (campo, criterio, estado) => {
     const response = await api.get(`/rollos/filtrar?${params.toString()}`, {
       withCredentials: true,
     });
-    return response.data;
+    return response.data.map(mapRollo);
   } catch (error) {
     console.error("Error en filtrarRollos:", error);
     throw error.response?.data || { message: "Error desconocido" };
