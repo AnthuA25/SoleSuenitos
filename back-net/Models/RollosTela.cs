@@ -27,6 +27,8 @@ public partial class RollosTela
 
     public decimal AltoCm { get; set; }
 
+    public bool? Activo { get; set; }
+
     public virtual Usuario? IdUsuarioRegistroNavigation { get; set; }
 
     public virtual ICollection<OrdenRollo> OrdenRollos { get; set; } = new List<OrdenRollo>();
