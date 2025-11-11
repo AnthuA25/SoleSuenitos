@@ -284,8 +284,7 @@ namespace back_net.Controllers
             if (rollo == null)
                 return NotFound(new { message = "Rollo no encontrado." });
 
-            // Eliminar físico:
-            _context.RollosTelas.Remove(rollo);
+            rollo.Activo = false;
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Rollo eliminado correctamente." });
