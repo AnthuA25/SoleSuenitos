@@ -1,178 +1,92 @@
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import UserHeader from "../../components/UserHeader";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
+import { listarOptimizacionesPorOrden } from "../../api/ordenesDisponibles";
+import Swal from "sweetalert2";
 
 function HistorialOptimizacionesOperario() {
   const navigate = useNavigate();
   const { codigo } = useParams();
+  const [optimizaciones, setOptimizaciones] = useState([]);
+  const [ordenInfo, setOrdenInfo] = useState(null);
+  const location = useLocation();
+  const { codigoOp, modelo } = location.state || {};
 
-  console.log("Código recibido:", codigo); // Debug
+  // 🔹 Cargar optimizaciones de la orden
+  useEffect(() => {
+    const cargarOptimizaciones = async () => {
+      try {
+        const idOp = codigo;
 
-  // 📌 DATOS FICTICIOS con ESTADO
-  const optimizacionesPorOrden = {
-    "OP-2025-001": {
-      producto: "Polo Básico",
-      optimizaciones: [
-        {
-          version: "v1",
-          telaUtilizada: "87 m",
-          desperdicio: "13 m",
-          aprovechamiento: "85%",
-          tiempoEstimado: "2h 00min",
-          estado: "Descartado"
-        },
-        {
-          version: "v2",
-          telaUtilizada: "69 m",
-          desperdicio: "15 m",
-          aprovechamiento: "82%",
-          tiempoEstimado: "3h 20min",
-          estado: "Óptima"
-        }
-      ]
-    },
-    "OP-2025-002": {
-      producto: "Pantalón Cargo",
-      optimizaciones: [
-        {
-          version: "v1",
-          telaUtilizada: "125 m",
-          desperdicio: "20 m",
-          aprovechamiento: "83%",
-          tiempoEstimado: "4h 30min",
-          estado: "Descartado"
-        },
-        {
-          version: "v2",
-          telaUtilizada: "110 m",
-          desperdicio: "18 m",
-          aprovechamiento: "86%",
-          tiempoEstimado: "4h 00min",
-          estado: "Óptima"
-        }
-      ]
-    },
-    "OP-2025-003": {
-      producto: "Bata de Bebé",
-      optimizaciones: [
-        {
-          version: "v1",
-          telaUtilizada: "45 m",
-          desperdicio: "8 m",
-          aprovechamiento: "88%",
-          tiempoEstimado: "1h 30min",
-          estado: "Descartado"
-        },
-        {
-          version: "v2",
-          telaUtilizada: "40 m",
-          desperdicio: "6 m",
-          aprovechamiento: "91%",
-          tiempoEstimado: "1h 15min",
-          estado: "Óptima"
-        }
-      ]
-    },
-    "OP-2025-004": {
-      producto: "Camisa Formal",
-      optimizaciones: [
-        {
-          version: "v1",
-          telaUtilizada: "95 m",
-          desperdicio: "12 m",
-          aprovechamiento: "87%",
-          tiempoEstimado: "2h 45min",
-          estado: "Descartado"
-        },
-        {
-          version: "v2",
-          telaUtilizada: "88 m",
-          desperdicio: "10 m",
-          aprovechamiento: "90%",
-          tiempoEstimado: "2h 30min",
-          estado: "Óptima"
-        }
-      ]
-    }
-  };
+        const data = await listarOptimizacionesPorOrden(idOp);
+        console.log("✅ Optimizaciones desde backend:", data);
 
-  const datosOrden = optimizacionesPorOrden[codigo];
+        if (!data || data.length === 0) {
+          Swal.fire({
+            title: "Sin optimizaciones",
+            text: "No hay versiones registradas para esta orden.",
+            icon: "info",
+            confirmButtonColor: "#2f6d6d",
+          });
+          setOptimizaciones([]);
+          return;
+        }
+
+        setOptimizaciones(data);
+        setOrdenInfo({
+          codigo: codigoOp || data[0]?.codigoOp || idOp,
+          producto: modelo || data[0]?.modelo || "Orden sin nombre",
+        });
+      } catch (error) {
+        console.error("Error al cargar optimizaciones:", error);
+        Swal.fire({
+          title: "Error",
+          text:
+            error.message ||
+            "No se pudieron cargar las optimizaciones de esta orden.",
+          icon: "error",
+          confirmButtonColor: "#2f6d6d",
+        });
+      }
+    };
+
+    cargarOptimizaciones();
+  }, [codigo, codigoOp, modelo]);
 
   const handleVerMarcador = (version) => {
     navigate(`/marcador/${codigo}/${version}`);
   };
 
   const handleVolver = () => {
-    navigate('/OrdenesDisponiblesope');
+    navigate("/OrdenesDisponiblesope");
   };
-
-  // Si no existe la orden
-  if (!datosOrden) {
-    return (
-      <div className="gestion-container">
-        <div className="gestion-box">
-          <div className="gestion-sidebar" style={{ justifyContent: 'flex-start' }}>
-            <div className="sidebar-header">
-              <img src={logo_blanco} alt="Logo" className="logo_blanco-img" />
-              <div className="sidebar-title">
-                <h2>SOLE<br/><span>Sueñitos</span></h2>
-              </div>
-            </div>
-            <ul style={{ marginTop: '20px' }}>
-              <li className="active" onClick={() => navigate("/OrdenesDisponiblesope")}>
-                Ordenes Disponibles
-              </li>
-            </ul>
-          </div>
-
-          <div className="gestion-content">
-            <div className="gestion-header">
-              <UserHeader />
-            </div>
-            <div style={{ textAlign: 'center', padding: 40 }}>
-              <h2 style={{ color: '#d33', marginBottom: 20 }}>
-                Orden no encontrada
-              </h2>
-              <p style={{ color: '#666', marginBottom: 20 }}>
-                No se encontraron datos para el código: {codigo}
-              </p>
-              <button 
-                onClick={handleVolver}
-                style={{
-                  background: '#2f6d6d',
-                  color: 'white',
-                  border: 'none',
-                  padding: '10px 24px',
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  fontSize: 14
-                }}
-              >
-                Volver a órdenes
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="gestion-container">
       <div className="gestion-box">
         {/* Sidebar */}
-        <div className="gestion-sidebar" style={{ justifyContent: 'flex-start' }}>
+        <div
+          className="gestion-sidebar"
+          style={{ justifyContent: "flex-start" }}
+        >
           <div className="sidebar-header">
             <img src={logo_blanco} alt="Logo" className="logo_blanco-img" />
             <div className="sidebar-title">
-              <h2>SOLE<br/><span>Sueñitos</span></h2>
+              <h2>
+                SOLE
+                <br />
+                <span>Sueñitos</span>
+              </h2>
             </div>
           </div>
 
-          <ul style={{ marginTop: '20px' }}>
-            <li className="active" onClick={() => navigate("/OrdenesDisponiblesope")}>
+          <ul style={{ marginTop: "20px" }}>
+            <li
+              className="active"
+              onClick={() => navigate("/OrdenesDisponiblesope")}
+            >
               Ordenes Disponibles
             </li>
           </ul>
@@ -184,17 +98,24 @@ function HistorialOptimizacionesOperario() {
             <UserHeader />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 12,
+            }}
+          >
             <button
               onClick={handleVolver}
               style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#2f6d6d',
-                display: 'flex',
-                alignItems: 'center',
-                fontSize: 24
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#2f6d6d",
+                display: "flex",
+                alignItems: "center",
+                fontSize: 24,
               }}
             >
               ←
@@ -202,90 +123,123 @@ function HistorialOptimizacionesOperario() {
             <h1 style={{ margin: 0 }}>Historial de optimizaciones</h1>
           </div>
 
-          <p style={{ color: '#666', marginBottom: 20 }}>
+          <p style={{ color: "#666", marginBottom: 20 }}>
             Selecciona una versión de marcador para visualizar o descargar
           </p>
 
           <div style={{ marginBottom: 16 }}>
-            <span style={{ fontWeight: 600, color: '#222', fontSize: 16 }}>
-              {codigo} - {datosOrden.producto}
+            <span style={{ fontWeight: 600, color: "#222", fontSize: 16 }}>
+              {ordenInfo
+                ? `${ordenInfo.codigo || codigo} – ${ordenInfo.producto|| ""}`
+                : codigo}
             </span>
           </div>
 
-          {datosOrden.optimizaciones.length === 0 ? (
-            <p style={{ 
-              textAlign: 'center', 
-              color: '#666', 
-              padding: 40, 
-              background: 'white', 
-              borderRadius: 10, 
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)' 
-            }}>
+          {optimizaciones.length === 0 ? (
+            <p
+              style={{
+                textAlign: "center",
+                color: "#666",
+                padding: 40,
+                background: "white",
+                borderRadius: 10,
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+              }}
+            >
               No hay optimizaciones registradas para esta orden
             </p>
           ) : (
-            <div style={{ 
-              overflowX: 'auto', 
-              background: 'white', 
-              borderRadius: 10, 
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)' 
-            }}>
-              <table className="historial-tabla" style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead style={{ backgroundColor: '#2f6d6d', color: 'white', textAlign: 'left' }}>
+            <div
+              style={{
+                overflowX: "auto",
+                background: "white",
+                borderRadius: 10,
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+              }}
+            >
+              <table
+                className="historial-tabla"
+                style={{ width: "100%", borderCollapse: "collapse" }}
+              >
+                <thead
+                  style={{
+                    backgroundColor: "#2f6d6d",
+                    color: "white",
+                    textAlign: "left",
+                  }}
+                >
                   <tr>
-                    <th style={{ padding: '12px 10px' }}>Versión</th>
-                    <th style={{ padding: '12px 10px' }}>Tela utilizada</th>
-                    <th style={{ padding: '12px 10px' }}>Desperdicio</th>
-                    <th style={{ padding: '12px 10px' }}>Aprovechamiento</th>
-                    <th style={{ padding: '12px 10px' }}>Tiempo estimado</th>
-                    <th style={{ padding: '12px 10px' }}>Estado</th>
-                    <th style={{ padding: '12px 10px' }}>Acción</th>
+                    <th style={{ padding: "12px 10px" }}>Versión</th>
+                    <th style={{ padding: "12px 10px" }}>Tela utilizada (m)</th>
+                    <th style={{ padding: "12px 10px" }}>Desperdicio (m)</th>
+                    <th style={{ padding: "12px 10px" }}>Aprovechamiento</th>
+                    <th style={{ padding: "12px 10px" }}>Estado</th>
+                    <th style={{ padding: "12px 10px" }}>Acción</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {datosOrden.optimizaciones.map((opt, index) => (
-                    <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: 12, color: '#222', fontWeight: 600 }}>
-                        {opt.version.toUpperCase()}
+                  {optimizaciones.map((opt, index) => (
+                    <tr key={index} style={{ borderBottom: "1px solid #eee" }}>
+                      <td
+                        style={{ padding: 12, color: "#222", fontWeight: 600 }}
+                      >
+                        V{opt.versionNum}
                       </td>
-                      <td style={{ padding: 12, color: '#222' }}>{opt.telaUtilizada}</td>
-                      <td style={{ padding: 12, color: '#222' }}>{opt.desperdicio}</td>
+                      <td style={{ padding: 12, color: "#222" }}>
+                        {opt.telaUtilizadaM ?? "-"}
+                      </td>
+                      <td style={{ padding: 12, color: "#222" }}>
+                        {opt.desperdicioM ?? "-"}
+                      </td>
                       <td style={{ padding: 12 }}>
-                        <span style={{
-                          background: parseFloat(opt.aprovechamiento) >= 85 ? '#d4edda' : '#fff3cd',
-                          color: parseFloat(opt.aprovechamiento) >= 85 ? '#155724' : '#856404',
-                          padding: '4px 8px',
-                          borderRadius: 6,
-                          fontSize: 13,
-                          fontWeight: 500
-                        }}>
-                          {opt.aprovechamiento}
+                        <span
+                          style={{
+                            background:
+                              parseFloat(opt.aprovechamientoPorcent) >= 85
+                                ? "#d4edda"
+                                : "#fff3cd",
+                            color:
+                              parseFloat(opt.aprovechamientoPorcent) >= 85
+                                ? "#155724"
+                                : "#856404",
+                            padding: "4px 8px",
+                            borderRadius: 6,
+                            fontSize: 13,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {opt.aprovechamientoPorcent
+                            ? `${opt.aprovechamientoPorcent}%`
+                            : "-"}
                         </span>
                       </td>
-                      <td style={{ padding: 12, color: '#222' }}>{opt.tiempoEstimado}</td>
                       <td style={{ padding: 12 }}>
-                        <span style={{
-                          background: opt.estado === 'Óptima' ? '#d4edda' : '#f8d7da',
-                          color: opt.estado === 'Óptima' ? '#155724' : '#721c24',
-                          padding: '4px 12px',
-                          borderRadius: 12,
-                          fontSize: 13,
-                          fontWeight: 500
-                        }}>
-                          {opt.estado}
+                        <span
+                          style={{
+                            background:
+                              opt.estado === "Óptima" ? "#d4edda" : "#f8d7da",
+                            color:
+                              opt.estado === "Óptima" ? "#155724" : "#721c24",
+                            padding: "4px 12px",
+                            borderRadius: 12,
+                            fontSize: 13,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {opt.estado || "Pendiente"}
                         </span>
                       </td>
                       <td style={{ padding: 12 }}>
                         <button
-                          onClick={() => handleVerMarcador(opt.version)}
+                          onClick={() => handleVerMarcador(opt.versionNum)}
                           style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#2f6d6d',
-                            cursor: 'pointer',
-                            textDecoration: 'underline',
+                            background: "none",
+                            border: "none",
+                            color: "#2f6d6d",
+                            cursor: "pointer",
+                            textDecoration: "underline",
                             fontSize: 14,
-                            fontWeight: 500
+                            fontWeight: 500,
                           }}
                         >
                           [Ver marcador]

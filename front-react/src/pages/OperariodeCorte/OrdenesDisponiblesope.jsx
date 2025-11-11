@@ -78,7 +78,9 @@ function OrdenesDisponibles() {
   };
 
   const handleVerOptimizaciones = (idOp) => {
-    navigate(`/historialoptiope/${idOp}`);
+    navigate(`/historialoptiope/${idOp}`),{
+      state:{codigoOp:idOp.codigoOp, modelo:idOp.modelo}
+    }
   };
 
   return (
