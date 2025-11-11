@@ -62,5 +62,63 @@ namespace back_net.Controllers
 
             return Ok(ordenes);
         }
+
+
+        [HttpGet("listar/{idOp}")]
+        [Authorize(Policy = "SoloOperarioCorte")]
+        public async Task<IActionResult> ListarOptimizacionesPorOrden(int idOp)
+        {
+            var optimizaciones = await _context.Optimizaciones
+                .Where(o => o.IdOp == idOp)
+                .OrderBy(o => o.VersionNum)
+                .Select(o => new
+                {
+                    o.IdOpt,
+                    o.VersionNum,
+                    o.NombreVersion,
+                    o.FechaGeneracion,
+                    o.AprovechamientoPorcent,
+                    o.DesperdicioM,
+                    o.TelaUtilizadaM,
+                    o.Estado,
+                    o.RutaPngGenerado,
+                    o.NombreArchivoDxf
+                })
+                .ToListAsync();
+
+            if (optimizaciones.Count == 0)
+                return NotFound(new { message = "No hay optimizaciones registradas para esta orden." });
+
+            return Ok(optimizaciones);
+        }
+
+        [HttpGet("detalle/{idOpt}")]
+        [Authorize(Policy = "SoloOperarioCorte")]
+        public async Task<IActionResult> ObtenerDetalleOptimizacion(int idOpt)
+        {
+            var opt = await _context.Optimizaciones
+                .Where(o => o.IdOpt == idOpt)
+                .Select(o => new
+                {
+                    o.IdOpt,
+                    o.IdOp,
+                    o.NombreVersion,
+                    o.VersionNum,
+                    o.AprovechamientoPorcent,
+                    o.DesperdicioM,
+                    o.TelaUtilizadaM,
+                    o.TiempoEstimadoMin,
+                    o.RutaPngGenerado,
+                    o.NombreArchivoDxf,
+                    o.MetricasJson,
+                    o.Estado
+                })
+                .FirstOrDefaultAsync();
+
+            if (opt == null)
+                return NotFound(new { message = "Optimización no encontrada" });
+
+            return Ok(opt);
+        }
     }
 }
