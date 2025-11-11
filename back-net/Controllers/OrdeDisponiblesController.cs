@@ -24,7 +24,9 @@ namespace back_net.Controllers
             var ordenes = await _context.OrdenProduccions
                 .Include(o => o.Optimizaciones)
                 .Include(o => o.ComentariosOps)
+                    .ThenInclude(c => c.IdUsuarioNavigation)
                 .OrderByDescending(o => o.FechaCreacion)
+
                 .Select(o => new
                 {
                     o.IdOp,
@@ -55,7 +57,9 @@ namespace back_net.Controllers
                             c.Mensaje,
                             c.Fecha,
                             c.Leido,
-                            Usuario = c.IdUsuarioNavigation.NombreCompleto
+                            Usuario = c.IdUsuarioNavigation != null
+                        ? c.IdUsuarioNavigation.NombreCompleto
+                        : "Desconocido"
                         }).ToList()
                 })
                 .ToListAsync();

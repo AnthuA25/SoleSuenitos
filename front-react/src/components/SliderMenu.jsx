@@ -39,16 +39,7 @@ function SidebarMenu() {
       {rol === "Operario de Corte" && (
         <>
           <li onClick={() => navigate("/OrdenesDisponiblesope")}>
-            Aprobación de Marcadores
-          </li>
-          <li onClick={() => navigate("/marcadordigitalv1")}>
-            Marcador Digital V1
-          </li>
-          <li onClick={() => navigate("/marcadordigitalv2")}>
-            Marcador Digital V2
-          </li>
-          <li onClick={() => navigate("/historialoptiope")}>
-            Historial de Optimizaciones
+            Ordenes Disponibles
           </li>
         </>
       )}

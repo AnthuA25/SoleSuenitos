@@ -9,8 +9,8 @@ import {
   generarV1,
   generarV2,
   compararOptimizaciones,
-  listarRollos,
 } from "../../api/ordenProducciónService";
+import { listarRollos } from "../../api/rolloService";
 
 function OrdenProduccion() {
   const [modelo, setModelo] = useState("");

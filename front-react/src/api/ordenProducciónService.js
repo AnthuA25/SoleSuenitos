@@ -1,5 +1,17 @@
 import api from "../api/axiosConfig"; 
 
+const mapOptimizacion = (o) => ({
+  idOpt: o.IdOpt,
+  codigoOp: o.CodigoOp,
+  modelo: o.Modelo,
+  talla: o.Talla,
+  fecha: o.Fecha,
+  nombreVersion: o.NombreVersion,
+  aprovechamientoPorcent: o.AprovechamientoPorcent,
+  desperdicioM: o.DesperdicioM,
+  telaUtilizadaM: o.TelaUtilizadaM,
+  estado: o.Estado,
+});
 
 export const leerPiezas = async (formData) => {
   try {
@@ -70,7 +82,7 @@ export const compararOptimizaciones = async (formData) => {
 export const listarOptimizaciones = async () => {
   try {
     const response = await api.get("/OrdenProduccion/listar-optimizaciones", { withCredentials: true });
-    return response.data;
+    return response.data.map(mapOptimizacion);
   } catch (error) {
     console.error("Error en listarOrdenProduccion:", error);
     throw error.response ? error.response.data : { message: "Error desconocido" };
@@ -81,7 +93,20 @@ export const listarOptimizaciones = async () => {
 export const obtenerDetalleOptimizacion = async (id) => {
   try {
     const response = await api.get(`/OrdenProduccion/detalle-optimizacion/${id}`, { withCredentials: true });
-    return response.data;
+    const o = response.data;
+    return {
+      idOpt: o.IdOpt,
+      codigoOp: o.CodigoOp,
+      modelo: o.Modelo,
+      talla: o.Talla,
+      nombreVersion: o.NombreVersion,
+      aprovechamientoPorcent: o.AprovechamientoPorcent,
+      desperdicioM: o.DesperdicioM,
+      telaUtilizadaM: o.TelaUtilizadaM,
+      metricasJson: o.MetricasJson,
+      rutaPngGenerado: o.RutaPngGenerado,
+      fechaGeneracion: o.FechaGeneracion,
+    };
   } catch (error) {
     console.error("Error en obtenerProduccionPorId:", error);
     throw error.response ? error.response.data : { message: "Error desconocido" };
@@ -95,15 +120,5 @@ export const eliminarOrdenProduccion = async (id) => {
   } catch (error) {
     console.error("Error en eliminarOrden:", error);
     throw error.response ? error.response.data : { message: "Error desconocido" };
-  }
-};
-
-export const listarRollos = async () => {
-  try {
-    const res = await api.get("/rollos/listar", { withCredentials: true });
-    return res.data;
-  } catch (error) {
-    console.error("Error en listarRollos:", error);
-    throw error.response?.data || { message: "Error al listar rollos" };
   }
 };

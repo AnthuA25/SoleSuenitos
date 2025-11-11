@@ -70,7 +70,7 @@ function Login() {
           Swal.fire("Error", "No se pudo identificar el rol del usuario", "error");
           return;
         }
-
+        console.log("Usuario rol:", usuario.rol);
         // Redirección según el rol
         const rol = usuario.rol.toLowerCase();
         if (rol.includes("logistica") || rol.includes("logística")) {
