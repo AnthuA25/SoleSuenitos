@@ -509,7 +509,7 @@ function HistorialRollos() {
                 <input
                   value={modalData.metrajeM}
                   onChange={(e) =>
-                    setModalData({ ...modalData, metraje: e.target.value })
+                    setModalData({ ...modalData, metrajeM: e.target.value })
                   }
                   style={{
                     width: "100%",
@@ -528,7 +528,7 @@ function HistorialRollos() {
                 <input
                   value={modalData.anchoCm}
                   onChange={(e) =>
-                    setModalData({ ...modalData, ancho: e.target.value })
+                    setModalData({ ...modalData, anchoCm: e.target.value })
                   }
                   style={{
                     width: "100%",

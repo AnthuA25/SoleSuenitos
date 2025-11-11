@@ -64,11 +64,15 @@ function Login() {
       const data = await login(email, password);
 
       Swal.fire("Éxito", data.message, "success").then(() => {
-        const usuario = data.usuario;
-        localStorage.setItem("usuario", JSON.stringify(usuario));
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
+
+        if (!usuario?.rol) {
+          Swal.fire("Error", "No se pudo identificar el rol del usuario", "error");
+          return;
+        }
 
         // Redirección según el rol
-        const rol = usuario.rol?.toLowerCase();
+        const rol = usuario.rol.toLowerCase();
         if (rol.includes("logistica") || rol.includes("logística")) {
           navigate("/moldes"); // Encargado de Logística
         } else if (rol.includes("operario")) {
