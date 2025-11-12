@@ -17,6 +17,7 @@ import HistorialOptimizacionesOperario from "./pages/OperariodeCorte/HistorialOp
 // Inspector de Calidad
 import HistorialInspeccion from "./pages/InspectorCalidad/HistorialInspeccion.jsx";
 import RegistrarInspeccion from "./pages/InspectorCalidad/RegistrarInspeccion.jsx";
+import OrdenesDisponiblesInspector from "./pages/InspectorCalidad/OrdenesDisponibles.jsx";
 import "./css/Global.css";
 
 
@@ -70,6 +71,9 @@ function App() {
         />
 
         {/*vista de Historial de Inspeccion*/}
+
+        <Route path="/ordenesdisponibles" element={<OrdenesDisponiblesInspector/>}/>
+
         <Route path="/historialinspeccion" element={<HistorialInspeccion />} />
 
         {/*vista de Registrar Inspeccion*/}

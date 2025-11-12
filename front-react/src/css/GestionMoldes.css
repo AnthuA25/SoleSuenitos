@@ -1499,5 +1499,47 @@
   padding-top: 60px;
 }
 .sidebar-header {
-  margin-bottom: 40px; /* 🔼 Aumenta o reduce según lo que necesites */
+  margin-bottom: 40px; /* Aumenta o reduce según lo que necesites */
+}
+
+
+
+/* Orden Disponibles */
+
+/* Estilo tabla de órdenes */
+.tabla-inspeccion {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tabla-inspeccion th {
+  background: #e8f0ef;
+  text-align: left;
+  padding: 10px 15px;
+  color: #264e4e;
+}
+
+.tabla-inspeccion td {
+  padding: 10px 15px;
+  border-top: 1px solid #ddd;
+}
+
+.btn-registrar {
+  background-color: #2f6d6d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.btn-registrar:hover {
+  background-color: #265c5c;
 }

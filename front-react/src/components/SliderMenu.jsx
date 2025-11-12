@@ -46,8 +46,8 @@ function SidebarMenu() {
 
       {rol === "Inspector de Calidad" && (
         <>
-          <li onClick={() => navigate("/registrarinspeccion")}>
-            Registrar Inspección
+          <li onClick={() => navigate("/ordenesdisponibles")}>
+            Ordenes Disponibles
           </li>
           <li onClick={() => navigate("/historialinspeccion")}>
             Historial de Inspección
