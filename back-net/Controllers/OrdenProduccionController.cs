@@ -124,7 +124,7 @@ namespace back_net.Controllers
         {
             var orden = await ObtenerOCrearOrdenAsync(modelo, talla, cantidad, rollosSeleccionados);
 
-            var result = await LlamarMicroservicioAsync("/optimize-comparar", archivoMolde, modelo, talla, cantidad, 1500, 3000, permitirGiro90);
+            var result = await LlamarMicroservicioAsync("/optimize-comparar", archivoMolde, modelo, talla, 1, 1500, 3000, permitirGiro90);
             var v1 = result.GetProperty("v1_metricas");
             var v2 = result.GetProperty("v2_metricas");
 
@@ -265,7 +265,7 @@ namespace back_net.Controllers
                 double ancho = (double)rollo.AnchoCm * 10;   // cm → mm
                 double largo = (double)rollo.MetrajeM * 1000; // m → mm
 
-                var result = await LlamarMicroservicioAsync(endpoint, archivoMolde, modelo, talla, cantidad, ancho, largo, permitirGiro90);
+                var result = await LlamarMicroservicioAsync(endpoint, archivoMolde, modelo, talla, 1, ancho, largo, permitirGiro90);
                 await GuardarOptimizacionAsync(orden, archivoMolde, result, version);
                 ActualizarRolloYOrden(rollo, orden, result);
 
