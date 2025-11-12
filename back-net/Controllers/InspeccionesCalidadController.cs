@@ -181,19 +181,63 @@ namespace back_net.Controllers
 
             return Ok(ordenes);
         }
-        [HttpPost("subir-evidencia")]
+
+        [HttpPost("{idInspeccion}/subir-evidencia/{criterio}")]
         [Authorize(Policy = "SoloInspectorCalidad")]
-        public async Task<IActionResult> SubirEvidencia(IFormFile archivo)
+        public async Task<IActionResult> SubirEvidenciaPorCriterio(int idInspeccion, string criterio, IFormFile archivo)
         {
             if (archivo == null || archivo.Length == 0)
-                return BadRequest(new { message = "Archivo inválido" });
+                return BadRequest(new { message = "Archivo no válido" });
 
+            var inspeccion = await _context.InspeccionesCalidads.FindAsync(idInspeccion);
+            if (inspeccion == null)
+                return NotFound(new { message = "Inspección no encontrada" });
+
+            // Validar que el criterio sea uno de los permitidos
+            var criteriosValidos = new[] { "PiezasUnidas", "TelaSinDefectos", "CosturasOk", "ListaParaEntrega" };
+            if (!criteriosValidos.Contains(criterio))
+                return BadRequest(new { message = "Criterio no válido" });
+
+            // Convertir archivo a bytes
             using var ms = new MemoryStream();
             await archivo.CopyToAsync(ms);
-            var bytes = ms.ToArray();
 
-            return Ok(new { fotoEvidencia = bytes });
+            // Si ya existía una evidencia para ese criterio, reemplázala
+            var evidenciaExistente = await _context.EvidenciaInspeccions
+                .FirstOrDefaultAsync(e => e.IdInspeccion == idInspeccion && e.TipoCriterio == criterio);
+
+            if (evidenciaExistente != null)
+            {
+                evidenciaExistente.NombreArchivo = archivo.FileName;
+                evidenciaExistente.TipoArchivo = archivo.ContentType;
+                evidenciaExistente.Archivo = ms.ToArray();
+                evidenciaExistente.FechaSubida = DateTime.UtcNow;
+            }
+            else
+            {
+                var evidencia = new EvidenciaInspeccion
+                {
+                    IdInspeccion = idInspeccion,
+                    TipoCriterio = criterio,
+                    NombreArchivo = archivo.FileName,
+                    TipoArchivo = archivo.ContentType,
+                    Archivo = ms.ToArray(),
+                    FechaSubida = DateTime.UtcNow
+                };
+                _context.EvidenciaInspeccions.Add(evidencia);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = $"Evidencia del criterio '{criterio}' subida correctamente",
+                criterio,
+                archivo = archivo.FileName
+            });
         }
+
+
 
         public class InspeccionCreateDto
         {

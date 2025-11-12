@@ -19,6 +19,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<ComentariosOp> ComentariosOps { get; set; }
 
+    public virtual DbSet<EvidenciaInspeccion> EvidenciaInspeccions { get; set; }
+
     public virtual DbSet<InspeccionesCalidad> InspeccionesCalidads { get; set; }
 
     public virtual DbSet<Molde> Moldes { get; set; }
@@ -94,6 +96,33 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.IdUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("comentarios_op_id_usuario_fkey");
+        });
+
+        modelBuilder.Entity<EvidenciaInspeccion>(entity =>
+        {
+            entity.HasKey(e => e.IdEvidencia).HasName("evidencia_inspeccion_pkey");
+
+            entity.ToTable("evidencia_inspeccion");
+
+            entity.Property(e => e.IdEvidencia).HasColumnName("id_evidencia");
+            entity.Property(e => e.Archivo).HasColumnName("archivo");
+            entity.Property(e => e.FechaSubida)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("fecha_subida");
+            entity.Property(e => e.IdInspeccion).HasColumnName("id_inspeccion");
+            entity.Property(e => e.NombreArchivo)
+                .HasMaxLength(255)
+                .HasColumnName("nombre_archivo");
+            entity.Property(e => e.TipoArchivo)
+                .HasMaxLength(100)
+                .HasColumnName("tipo_archivo");
+            entity.Property(e => e.TipoCriterio)
+                .HasMaxLength(100)
+                .HasColumnName("tipo_criterio");
+
+            entity.HasOne(d => d.IdInspeccionNavigation).WithMany(p => p.EvidenciaInspeccions)
+                .HasForeignKey(d => d.IdInspeccion)
+                .HasConstraintName("fk_inspeccion");
         });
 
         modelBuilder.Entity<InspeccionesCalidad>(entity =>
