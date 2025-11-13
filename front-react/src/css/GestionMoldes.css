@@ -547,6 +547,12 @@
 
 /* === ESTILOS ORDEN DE PRODUCCIÓN === */
 
+
+.changecolor{
+  color: black;
+  font-weight: initial;
+}
+
 .orden-container {
   display: flex;
   justify-content: center;

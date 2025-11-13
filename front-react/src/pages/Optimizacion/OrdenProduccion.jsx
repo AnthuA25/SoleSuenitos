@@ -24,6 +24,7 @@ function OrdenProduccion() {
   const [showMarcadorV2, setShowMarcadorV2] = useState(false);
   const [optValuesV2, setOptValuesV2] = useState(null);
   const [showCompararMarcadores, setShowCompararMarcadores] = useState(false);
+  const [archivoDXF, setArchivoDXF] = useState(null);
 
   // Cargar rollos desde el backend
   useEffect(() => {
@@ -187,6 +188,7 @@ function OrdenProduccion() {
       confirmButtonColor: "#2f6d6d",
     });
     if (!archivoMolde) return;
+    setArchivoDXF(archivoMolde);
 
     Swal.fire({
       title: "Generando V1...",
@@ -244,6 +246,7 @@ function OrdenProduccion() {
       confirmButtonColor: "#2f6d6d",
     });
     if (!archivoMolde) return;
+    setArchivoDXF(archivoMolde);
 
     Swal.fire({
       title: "Generando V2...",
@@ -305,6 +308,15 @@ function OrdenProduccion() {
   // Comparar marcadores
 
   const handleComparar = async () => {
+    if (!archivoDXF) {
+      Swal.fire(
+        "Error",
+        "Debes generar V1 o V2 primero para comparar.",
+        "error"
+      );
+      return;
+    }
+
     Swal.fire({
       title: "Comparando V1 y V2...",
       allowOutsideClick: false,
@@ -318,7 +330,8 @@ function OrdenProduccion() {
       rollosSeleccionados.forEach((r) =>
         formData.append("rollosSeleccionados", r.idRollo)
       );
-      formData.append("archivoMolde", new Blob([])); // dummy
+
+      formData.append("archivoMolde", archivoDXF);
       formData.append("permitirGiro90", true);
 
       const result = await compararOptimizaciones(formData);
@@ -397,7 +410,7 @@ function OrdenProduccion() {
                 }}
               >
                 <div>
-                  <label>Modelo</label>
+                  <label class="changecolor">Modelo</label>
                   <input
                     className="orden-input"
                     value={modelo}
@@ -406,7 +419,7 @@ function OrdenProduccion() {
                   />
                 </div>
                 <div>
-                  <label>Talla</label>
+                  <label class="changecolor">Talla</label>
                   <input
                     className="orden-input"
                     value={talla}
@@ -415,7 +428,7 @@ function OrdenProduccion() {
                   />
                 </div>
                 <div>
-                  <label>Cantidad</label>
+                  <label class="changecolor">Cantidad</label>
                   <input
                     className="orden-input"
                     type="number"
@@ -425,7 +438,7 @@ function OrdenProduccion() {
                   />
                 </div>
                 <div>
-                  <label>Rollos disponibles</label>
+                  <label class="changecolor">Rollos disponibles</label>
                   <button
                     className="elegir-btn"
                     onClick={handleVerRollos}
@@ -527,7 +540,7 @@ function OrdenProduccion() {
             </>
           ) : showOptimizacion ? (
             <>
-              <h1>Optimización V1</h1>
+              <h1>Marcador Digital Textil - V1</h1>
               <div
                 style={{
                   background: "#204e4eff",
@@ -594,7 +607,7 @@ function OrdenProduccion() {
             </>
           ) : showMarcadorV2 ? (
             <>
-              <h1>Optimización V2</h1>
+              <h1>Marcador digital - V2</h1>
               <div
                 style={{
                   background: "#204e4eff",

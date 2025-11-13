@@ -118,35 +118,68 @@ namespace back_net.Controllers
         [HttpPost("comparar")]
         [Authorize(Policy = "SoloLogistica")]
         public async Task<IActionResult> Comparar(
-    [FromForm] string modelo, [FromForm] string talla, [FromForm] int cantidad,
-    [FromForm] List<int> rollosSeleccionados, [FromForm] IFormFile archivoMolde,
-    [FromForm] bool permitirGiro90 = true)
+            [FromForm] string modelo, 
+            [FromForm] string talla, 
+            [FromForm] int cantidad,
+            [FromForm] List<int> rollosSeleccionados, 
+            [FromForm] IFormFile archivoMolde,
+            [FromForm] bool permitirGiro90 = true)
         {
-            var orden = await ObtenerOCrearOrdenAsync(modelo, talla, cantidad, rollosSeleccionados);
-
-            var result = await LlamarMicroservicioAsync("/optimize-comparar", archivoMolde, modelo, talla, 1, 1500, 3000, permitirGiro90);
-            var v1 = result.GetProperty("v1_metricas");
-            var v2 = result.GetProperty("v2_metricas");
-
-            double apV1 = v1.GetProperty("aprovechamiento_porcentaje").GetDouble();
-            double apV2 = v2.GetProperty("aprovechamiento_porcentaje").GetDouble();
-
-            string mejor = apV2 > apV1 ? "V2" : "V1";
-
-            // 🔹 Marcar la mejor como óptima
-            var optimas = _context.Optimizaciones.Where(o => o.IdOp == orden.IdOp);
-            foreach (var opt in optimas)
-                opt.EsOptimaFinal = opt.NombreVersion == mejor;
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+            try
             {
-                message = "Comparación completada",
-                mejor_version = mejor,
-                v1 = v1.ToString(),
-                v2 = v2.ToString()
-            });
+                var orden = await ObtenerOCrearOrdenAsync(modelo, talla, cantidad, rollosSeleccionados);
+
+                var rollo = await _context.RollosTelas.FindAsync(rollosSeleccionados.First());
+                if (rollo == null)
+                    return BadRequest(new { message = "Rollo no encontrado" });
+
+                double ancho = (double)rollo.AnchoCm * 10;     // cm → mm
+                double largo = (double)rollo.MetrajeM * 1000;  // m → mm
+
+                // Llamar al microservicio /optimize-comparar
+                var result = await LlamarMicroservicioAsync(
+                    "/optimize-comparar", 
+                    archivoMolde, 
+                    modelo, 
+                    talla, 
+                    cantidad, 
+                    ancho, 
+                    largo, 
+                    permitirGiro90
+                );
+
+                // Leer métricas
+                var v1 = result.GetProperty("v1_metricas");
+                var v2 = result.GetProperty("v2_metricas");
+
+                double apV1 = v1.GetProperty("aprovechamiento_porcentaje").GetDouble();
+                double apV2 = v2.GetProperty("aprovechamiento_porcentaje").GetDouble();
+
+                string mejor = apV2 > apV1 ? "V2" : "V1";
+
+                // PNG óptimo
+                string png = result.TryGetProperty("png", out var pngProp) ? pngProp.GetString() : "";
+
+                // Paquete completo
+                var respuesta = new
+                {
+                    message = "Comparación completada",
+                    mejor_version = mejor,
+                    optima = new
+                    {
+                        png = png,
+                        metricas = mejor == "V2" ? v2 : v1
+                    }
+                };
+
+                return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error al comparar: {ex.Message}" });
+            }
         }
+
 
         // =====================
         // Listar optimizaciones registradas
