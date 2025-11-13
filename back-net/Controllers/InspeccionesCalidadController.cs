@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using back_net.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
+using QuestPDF.Helpers;
 
 namespace back_net.Controllers
 {
@@ -196,7 +199,6 @@ namespace back_net.Controllers
         }
 
         [HttpGet("reporte/{id}")]
-        [Authorize(Policy = "SoloInspectorCalidad")]
         public async Task<IActionResult> GenerarReportePdf(int id)
         {
             var inspeccion = await _context.InspeccionesCalidads
@@ -207,35 +209,115 @@ namespace back_net.Controllers
             if (inspeccion == null)
                 return NotFound();
 
-            // Construir contenido PDF
-            var texto = $@"
-                REPORTE DE INSPECCIÓN DE CALIDAD
-                Fecha: {inspeccion.FechaInspeccion}
+            var observaciones = inspeccion.Observaciones ?? "Sin observaciones";
 
-                INSPECTOR: {inspeccion.IdUsuarioInspectorNavigation.NombreCompleto}
+            var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "logo_solesuenitos.png");
+            byte[]? logoBytes = System.IO.File.Exists(logoPath) ? System.IO.File.ReadAllBytes(logoPath) : null;
 
-                ORDEN DE PRODUCCIÓN
-                Código OP: {inspeccion.IdOpNavigation.CodigoOp}
-                Modelo: {inspeccion.IdOpNavigation.Modelo}
-                Cantidad: {inspeccion.IdOpNavigation.Cantidad}
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Margin(40);
 
-                CRITERIOS
-                - Piezas unidas: {(inspeccion.PiezasUnidas.GetValueOrDefault() ? "✔" : "✘")}
-                - Tela sin defectos: {(inspeccion.TelaSinDefectos.GetValueOrDefault() ? "✔" : "✘")}
-                - Costuras correctas: {(inspeccion.CosturasOk.GetValueOrDefault() ? "✔" : "✘")}
-                - Lista para entrega: {(inspeccion.ListaParaEntrega.GetValueOrDefault() ? "✔" : "✘")}
+                    // === HEADER ===
+                    page.Header().Row(row =>
+                    {
+                        if (logoBytes != null)
+                        {
+                            row.ConstantItem(80).Image(logoBytes);
+                        }
 
-                OBSERVACIONES
-                {inspeccion.Observaciones}
+                        row.RelativeItem().Column(col =>
+                        {
+                            col.Item().Text("SOLE SUEÑITOS")
+                                .FontSize(20).Bold().FontColor("#2f6d6d");
 
-                RESULTADO FINAL: {inspeccion.ResultadoFinal}
-                NOTA ADICIONAL: {inspeccion.NotaAdicional}
-";
+                            col.Item().Text("Reporte de Inspección de Calidad")
+                                .FontSize(14).FontColor("#0f836f");
+                        });
+                    });
 
-            var pdfBytes = System.Text.Encoding.UTF8.GetBytes(texto);
+                    // === CONTENT ===
+                    page.Content().Column(col =>
+                    {
+                        col.Spacing(10);
 
+                        col.Item().Text($"REPORTE DE INSPECCIÓN - {inspeccion.CodigoInspeccion}")
+                            .FontSize(22).Bold().AlignCenter();
+
+                        col.Item().LineHorizontal(1).LineColor("#cfcfcf");
+
+                        // Datos principales
+                        col.Item().Row(r =>
+                        {
+                            r.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text($"Fecha: {inspeccion.FechaInspeccion}");
+                                c.Item().Text($"Inspector: {inspeccion.IdUsuarioInspectorNavigation.NombreCompleto}");
+                                c.Item().Text($"Código OP: {inspeccion.IdOpNavigation.CodigoOp}");
+                            });
+
+                            r.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text($"Modelo: {inspeccion.IdOpNavigation.Modelo}");
+                                c.Item().Text($"Cantidad: {inspeccion.IdOpNavigation.Cantidad}");
+                            });
+                        });
+
+                        col.Item().LineHorizontal(1).LineColor("#cfcfcf");
+
+                        // === CRITERIOS ===
+                        col.Item().Text("CRITERIOS").Bold().FontSize(16);
+
+                        col.Item().Table(t =>
+                        {
+                            t.ColumnsDefinition(c =>
+                            {
+                                c.RelativeColumn();
+                                c.ConstantColumn(80);
+                            });
+
+                            void AddRow(string criterio, bool valor)
+                            {
+                                t.Cell().Text(criterio);
+                                t.Cell().Text(valor ? "✔ Sí" : "✘ No")
+                                    .FontColor(valor ? "#0f836f" : "#d9534f").Bold();
+                            }
+
+                            AddRow("Piezas unidas", inspeccion.PiezasUnidas ?? false);
+                            AddRow("Tela sin defectos", inspeccion.TelaSinDefectos ?? false);
+                            AddRow("Costuras correctas", inspeccion.CosturasOk ?? false);
+                            AddRow("Lista para entrega", inspeccion.ListaParaEntrega ?? false);
+                        });
+
+                        col.Item().LineHorizontal(1).LineColor("#cfcfcf");
+
+                        // === OBSERVACIONES ===
+                        col.Item().Text("OBSERVACIONES").Bold().FontSize(16);
+                        col.Item().Text(observaciones);
+
+                        col.Item().LineHorizontal(1).LineColor("#cfcfcf");
+
+                        // === RESULTADO FINAL ===
+                        col.Item().Text($"RESULTADO FINAL: {inspeccion.ResultadoFinal}")
+                            .Bold().FontSize(18).FontColor("#2f6d6d");
+
+                        col.Item().Text($"NOTA ADICIONAL: {inspeccion.NotaAdicional}");
+                    });
+
+                    // === FOOTER ===
+                    page.Footer().AlignCenter().Text("© 2025 Sole Sueñitos - Sistema de Inspección Textil")
+                        .FontSize(10).FontColor("#666");
+                });
+            });
+
+            var pdfBytes = document.GeneratePdf();
             return File(pdfBytes, "application/pdf", $"Reporte_{inspeccion.CodigoInspeccion}.pdf");
         }
+
+
+
 
         [HttpGet("orden/{idOp}")]
         [Authorize(Policy = "SoloInspectorCalidad")]

@@ -2,7 +2,9 @@ using back_net.Configurations;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using System.Text.Json.Serialization;
+using QuestPDF.Infrastructure;
 
+QuestPDF.Settings.License = LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuración modular
