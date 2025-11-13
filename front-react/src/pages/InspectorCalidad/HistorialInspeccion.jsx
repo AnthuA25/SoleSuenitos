@@ -168,12 +168,6 @@ export default function HistorialInspeccion() {
             Consulte el registro de todas las inspecciones realizadas.
           </p>
 
-          <div className="top-actions">
-            <button className="btn-incidencia">
-              <FaRegEdit size={16} /> Registrar Inspección
-            </button>
-          </div>
-
           <div className="busqueda-box">
             <input
               type="text"
