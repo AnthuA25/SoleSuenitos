@@ -32,6 +32,7 @@ namespace back_net.Controllers
                     c.Mensaje,
                     c.Fecha,
                     c.Leido,
+                    c.IdUsuario,
                     Usuario = c.IdUsuarioNavigation.NombreCompleto
                 })
                 .ToListAsync();
@@ -61,7 +62,7 @@ namespace back_net.Controllers
                 IdUsuario = idUsuario,
                 Mensaje = dto.Mensaje,
                 Fecha = DateTime.UtcNow,
-                Leido = false
+                Leido = true
             };
 
             _context.ComentariosOps.Add(comentario);

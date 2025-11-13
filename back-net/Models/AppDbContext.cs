@@ -250,6 +250,7 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(20)
                 .HasDefaultValueSql("'restringida'::character varying")
                 .HasColumnName("orientacion_piezas");
+            entity.Property(e => e.RepeticionesNecesarias).HasColumnName("repeticiones_necesarias");
             entity.Property(e => e.RutaPngGenerado).HasColumnName("ruta_png_generado");
             entity.Property(e => e.TelaUtilizadaM)
                 .HasPrecision(9, 2)

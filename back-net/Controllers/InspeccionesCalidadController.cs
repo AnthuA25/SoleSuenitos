@@ -78,6 +78,7 @@ namespace back_net.Controllers
                 message = "Inspección registrada correctamente",
                 inspeccion = new
                 {
+                    inspeccion.IdInspeccion,
                     inspeccion.CodigoInspeccion,
                     inspeccion.IdOp,
                     inspeccion.ResultadoFinal,
@@ -160,7 +161,7 @@ namespace back_net.Controllers
             return Ok(new { message = "Inspección eliminada correctamente" });
         }
 
-        // 📦 Listar órdenes disponibles para inspeccionar
+        // Listar órdenes disponibles para inspeccionar
         [HttpGet("ordenes-disponibles")]
         [Authorize(Policy = "SoloInspectorCalidad")]
         public async Task<IActionResult> ListarOrdenesDisponibles()
@@ -173,13 +174,34 @@ namespace back_net.Controllers
                     o.CodigoOp,
                     o.Modelo,
                     o.Estado,
-                    o.FechaEntrega,
-                    o.Cantidad
+                    o.FechaCreacion,
+                    o.Cantidad,
                 })
                 .OrderBy(o => o.CodigoOp)
                 .ToListAsync();
 
             return Ok(ordenes);
+        }
+
+        [HttpGet("orden/{idOp}")]
+        [Authorize(Policy = "SoloInspectorCalidad")]
+        public async Task<IActionResult> ObtenerOrden(int idOp)
+        {
+            var orden = await _context.OrdenProduccions
+                .Where(o => o.IdOp == idOp)
+                .Select(o => new
+                {
+                    o.IdOp,
+                    o.CodigoOp,
+                    o.Modelo,
+                    o.Cantidad
+                })
+                .FirstOrDefaultAsync();
+
+            if (orden == null)
+                return NotFound(new { message = "Orden no encontrada" });
+
+            return Ok(orden);
         }
 
         [HttpPost("{idInspeccion}/subir-evidencia/{criterio}")]

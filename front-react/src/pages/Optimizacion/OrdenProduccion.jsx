@@ -266,10 +266,9 @@ function OrdenProduccion() {
       Swal.close();
 
       const data = result?.data ?? result;
-      const pngPath = data?.png || data?.data?.png;
+      const pngPath = data?.png || data?.data?.png; // toma el valor del PNG correctamente
       const m = data?.metricas || data?.data?.metricas;
 
-      // 🧩 Validación extra
       if (!pngPath) {
         Swal.fire(
           "Error",
@@ -282,8 +281,11 @@ function OrdenProduccion() {
       const baseUrl =
         import.meta.env.VITE_API_URL?.replace("/api", "") ||
         "http://localhost:5247";
-      const imageUrl = `${baseUrl}/${encodeURI(data.png.replace(/\\/g, "/"))}`;
+
+      // 🔹 Usa pngPath en lugar de data.png
+      const imageUrl = `${baseUrl}/${encodeURI(pngPath.replace(/\\/g, "/"))}`;
       console.log("Marcador generado:", imageUrl);
+
       setOptValuesV2({
         telaUtilizada: `${(m.largo_usado_mm / 1000).toFixed(2)} m`,
         aprovechamiento: `${m.aprovechamiento_porcentaje.toFixed(2)}%`,
@@ -321,12 +323,29 @@ function OrdenProduccion() {
 
       const result = await compararOptimizaciones(formData);
       Swal.close();
-      Swal.fire(
-        "Comparación completada",
-        `La mejor versión es: <b>${result.mejor_version}</b>`,
-        "success"
-      );
+      const { mejor_version, optima } = result;
+      const baseUrl =
+        import.meta.env.VITE_API_URL?.replace("/api", "") ||
+        "http://localhost:5247";
+      const imageUrl = `${baseUrl}/${encodeURI(
+        optima.png.replace(/\\/g, "/")
+      )}`;
+
+      setOptValuesV2({
+        titulo: `Marcador versión óptima: ${mejor_version}`,
+        telaUtilizada: `${(optima.metricas.largo_usado_mm / 1000).toFixed(
+          2
+        )} m`,
+        aprovechamiento: `${optima.metricas.aprovechamiento_porcentaje.toFixed(
+          2
+        )}%`,
+        desperdicio: `${optima.metricas.desperdicio_porcentaje.toFixed(2)}%`,
+        imagen: imageUrl,
+      });
+
+      setShowMarcadorV2(false);
       setShowCompararMarcadores(true);
+      Swal.fire("Éxito", `La versión óptima es ${mejor_version}`, "success");
     } catch {
       Swal.close();
       Swal.fire("Error", "No se pudo realizar la comparación.", "error");
@@ -608,6 +627,20 @@ function OrdenProduccion() {
                     </tr>
                   </tbody>
                 </table>
+                {optValuesV2?.imagen && (
+                  <div style={{ marginTop: 20, textAlign: "center" }}>
+                    <img
+                      src={optValuesV2.imagen}
+                      alt="Marcador V2"
+                      style={{
+                        width: "80%",
+                        maxWidth: "800px",
+                        borderRadius: "10px",
+                        boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+                      }}
+                    />
+                  </div>
+                )}
                 <div
                   style={{
                     display: "flex",
@@ -619,6 +652,70 @@ function OrdenProduccion() {
                   <button className="optimizar-btn" onClick={handleComparar}>
                     Comparar Marcadores
                   </button>
+                  <button className="cancelar-btn" onClick={handleVolverOrden}>
+                    Volver
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : showCompararMarcadores ? (
+            <>
+              <h1>{optValuesV2?.titulo || "Marcador versión óptima"}</h1>
+              <div
+                style={{
+                  background: "#204e4eff",
+                  padding: 50,
+                  borderRadius: 10,
+                  width: "80%",
+                  maxWidth: 600,
+                }}
+              >
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <b>Tela utilizada:</b>
+                      </td>
+                      <td>{optValuesV2?.telaUtilizada}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Aprovechamiento:</b>
+                      </td>
+                      <td>{optValuesV2?.aprovechamiento}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <b>Desperdicio:</b>
+                      </td>
+                      <td>{optValuesV2?.desperdicio}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {optValuesV2?.imagen && (
+                  <div style={{ marginTop: 20, textAlign: "center" }}>
+                    <img
+                      src={optValuesV2.imagen}
+                      alt="Marcador óptimo"
+                      style={{
+                        width: "80%",
+                        maxWidth: "800px",
+                        borderRadius: "10px",
+                        boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 10,
+                    marginTop: 20,
+                  }}
+                >
                   <button className="cancelar-btn" onClick={handleVolverOrden}>
                     Volver
                   </button>

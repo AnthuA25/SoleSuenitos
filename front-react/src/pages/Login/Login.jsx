@@ -78,7 +78,7 @@ function Login() {
         } else if (rol.includes("operario")) {
           navigate("/OrdenesDisponiblesope"); // Operario de Corte
         } else if (rol.includes("calidad")) {
-          navigate("/registrarinspeccion"); // Inspector de Calidad
+          navigate("/ordenesdisponibles"); // Inspector de Calidad
         } else {
           navigate("/"); // Fallback (en caso de rol desconocido)
         }

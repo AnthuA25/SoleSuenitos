@@ -47,6 +47,8 @@ public partial class Optimizacione
 
     public bool? EsOptimaFinal { get; set; }
 
+    public int? RepeticionesNecesarias { get; set; }
+
     public virtual ICollection<AnotacionesOpt> AnotacionesOpts { get; set; } = new List<AnotacionesOpt>();
 
     public virtual Usuario? GeneradoPorNavigation { get; set; }

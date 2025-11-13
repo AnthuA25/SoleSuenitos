@@ -32,6 +32,7 @@ const mapComentario = (c) => ({
   fecha: c.Fecha,
   leido: c.Leido,
   usuario: c.Usuario,
+  idUsuario: c.IdUsuario,
 });
 
 export const listarOrdenesDisponibles = async () => {
@@ -104,5 +105,20 @@ export const agregarComentario = async (comentario) => {
   } catch (error) {
     console.error("Error en agregarComentario:", error);
     throw error.response?.data || { message: "Error al agregar comentario." };
+  }
+};
+
+
+export const marcarComentarioLeido = async (idCom) => {
+  try {
+    const response = await api.put(
+      `/ComentariosOp/marcar-leido/${idCom}`,
+      {},
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error en marcarComentarioLeido:", error);
+    throw error.response?.data || { message: "Error al marcar comentario como leído." };
   }
 };

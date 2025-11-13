@@ -1290,6 +1290,7 @@
   flex-direction: column;
   gap: 8px;
   margin-bottom: 25px;
+  color: black;
 }
  
 .notas-section textarea {
@@ -1301,6 +1302,7 @@
   background: white;
   resize: none;
   outline: none;
+  color: black;
   font-size: 14px;
 }
  

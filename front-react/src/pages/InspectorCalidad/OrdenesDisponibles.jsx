@@ -1,35 +1,34 @@
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SidebarMenu from "../../components/SliderMenu";
 import UserHeader from "../../components/UserHeader";
 import logo_blanco from "../../images/logo_blanco.svg";
 import "../../css/GestionMoldes.css";
+import Swal from "sweetalert2";
+import { listarOrdenesDisponibles } from "../../api/inspeccionesService";
 
 export default function OrdenesDisponibles() {
   const navigate = useNavigate();
+  const [ordenes, setOrdenes] = useState([]);
 
-  const ordenes = [
-    {
-      codigo: "OP-2025-001",
-      producto: "Polo",
-      estado: "Pendiente",
-      fecha: "7/09/2025",
-      cantidad: 10,
-    },
-    {
-      codigo: "OP-2025-002",
-      producto: "Pantalón",
-      estado: "En proceso",
-      fecha: "7/09/2025",
-      cantidad: 20,
-    },
-    {
-      codigo: "OP-2025-003",
-      producto: "Bata",
-      estado: "Listo",
-      fecha: "7/09/2025",
-      cantidad: 40,
-    },
-  ];
+  useEffect(() => {
+    const cargarOrdenes = async () => {
+      try {
+        const data = await listarOrdenesDisponibles();
+        setOrdenes(data);
+      } catch (error) {
+        Swal.fire({
+          title: "Error al cargar órdenes",
+          text:
+            error.message || "No se pudieron obtener las órdenes disponibles.",
+          icon: "error",
+          confirmButtonColor: "#2f6d6d",
+        });
+      }
+    };
+
+    cargarOrdenes();
+  }, []);
 
   return (
     <div className="gestion-container">
@@ -64,29 +63,43 @@ export default function OrdenesDisponibles() {
                 <th>Código</th>
                 <th>Producto</th>
                 <th>Estado</th>
-                <th>Fecha de entrega</th>
+                <th>Fecha de Creacion</th>
                 <th>Cantidad</th>
                 <th>Acción</th>
               </tr>
             </thead>
             <tbody>
-              {ordenes.map((orden, index) => (
-                <tr key={index}>
-                  <td>{orden.codigo}</td>
-                  <td>{orden.producto}</td>
-                  <td>{orden.estado}</td>
-                  <td>{orden.fecha}</td>
-                  <td>{orden.cantidad}</td>
-                  <td>
-                    <button
-                      className="btn-registrar"
-                      onClick={() => navigate("/registrarinspeccion")}
-                    >
-                      Registrar inspección
-                    </button>
+              {ordenes.length > 0 ? (
+                ordenes.map((orden, index) => (
+                  <tr key={index}>
+                    <td>{orden.codigo}</td>
+                    <td>{orden.producto}</td>
+                    <td>{orden.estado}</td>
+                    <td>
+                      {orden.fechaCreacion
+                        ? new Date(orden.fechaCreacion).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>{orden.cantidad}</td>
+                    <td>
+                      <button
+                        className="btn-registrar"
+                        onClick={() =>
+                          navigate(`/registrarinspeccion?idOp=${orden.idOp}`)
+                        }
+                      >
+                        Registrar inspección
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: "center", padding: 20 }}>
+                    No hay órdenes disponibles
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

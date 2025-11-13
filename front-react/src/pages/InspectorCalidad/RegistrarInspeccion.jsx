@@ -1,35 +1,61 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import SidebarMenu from "../../components/SliderMenu";
 import UserHeader from "../../components/UserHeader";
 import logo_blanco from "../../images/logo_blanco.svg";
 import { Upload } from "lucide-react";
 import "../../css/GestionMoldes.css";
+// import { Upload } from "lucide-react";
+import {
+  obtenerOrden,
+  registrarInspeccion,
+  subirEvidencia,
+} from "../../api/inspeccionesService";
 
 export default function RegistrarInspeccion() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const idOp = params.get("idOp");
+
+  const [ordenInfo, setOrdenInfo] = useState(null);
+
+  useEffect(() => {
+    const loadOrden = async () => {
+      const data = await obtenerOrden(idOp);
+      setOrdenInfo(data);
+    };
+    loadOrden();
+  }, [idOp]);
   const [inspeccion, setInspeccion] = useState([
     {
-      criterio: "¿Las piezas están correctamente unidas (ejemplo: mangas, cuello, bolsillos)?",
+      criterio: "PiezasUnidas",
+      pregunta:
+        "¿Las piezas están correctamente unidas (ejemplo: mangas, cuello, bolsillos)?",
       respuesta: null,
-      observacion: "Hilo suelto en mangas",
+      observacion: "",
       evidencia: null,
     },
     {
-      criterio: "¿La tela no presenta defectos (manchas, agujeros, desgaste)?",
+      criterio: "TelaSinDefectos",
+      pregunta: "¿La tela no presenta defectos (manchas, agujeros, desgaste)?",
       respuesta: null,
-      observacion: "Mancha en 2 prendas",
+      observacion: "",
       evidencia: null,
     },
     {
-      criterio: "¿Las costuras están rectas y firmes?",
+      criterio: "CosturasOk",
+      pregunta: "¿Las costuras están rectas y firmes?",
       respuesta: null,
-      observacion: "Todo conforme",
+      observacion: "",
       evidencia: null,
     },
     {
-      criterio: "¿Está lista para ser empacada o entregada?",
+      criterio: "ListaParaEntrega",
+      pregunta: "¿Está lista para ser empacada o entregada?",
       respuesta: null,
-      observacion: "Lista para entrega",
+      observacion: "",
       evidencia: null,
     },
   ]);
@@ -54,45 +80,50 @@ export default function RegistrarInspeccion() {
     setInspeccion(copia);
   };
 
-  // ✅ CONFIRMACIÓN DE GUARDADO
+  // CONFIRMACIÓN DE GUARDADO
   const handleGuardar = async () => {
-    // Validación
     const faltanRespuestas = inspeccion.some((x) => x.respuesta === null);
-
     if (faltanRespuestas) {
-      Swal.fire({
-        title: "Respuestas incompletas",
-        text: "Debe marcar ✓ o ✕ en todos los criterios.",
-        icon: "warning",
-        confirmButtonColor: "#2f6d6d",
-      });
+      Swal.fire(
+        "Respuestas incompletas",
+        "Completa todos los criterios",
+        "warning"
+      );
       return;
     }
 
     try {
-      Swal.fire({
-        title: "Inspección guardada",
-        text: "El registro fue guardado correctamente.",
-        icon: "success",
-        confirmButtonColor: "#2f6d6d",
-      });
+      const data = {
+        idOp: parseInt(idOp),
+        piezasUnidas: inspeccion.find((x) => x.criterio === "PiezasUnidas")
+          .respuesta,
+        telaSinDefectos: inspeccion.find(
+          (x) => x.criterio === "TelaSinDefectos"
+        ).respuesta,
+        costurasOk: inspeccion.find((x) => x.criterio === "CosturasOk")
+          .respuesta,
+        listaParaEntrega: inspeccion.find(
+          (x) => x.criterio === "ListaParaEntrega"
+        ).respuesta,
+        observaciones: inspeccion.map((x) => x.observacion),
+        resultadoFinal: "Pendiente de aprobación",
+        notaAdicional: notas,
+      };
 
-      // Reset
-      setInspeccion((prev) =>
-        prev.map((item) => ({
-          ...item,
-          respuesta: null,
-          evidencia: null,
-        }))
+      const res = await registrarInspeccion(data);
+      const idInspeccion = res.inspeccion.idInspeccion;
+
+      for (const item of inspeccion) {
+        if (item.evidencia) {
+          await subirEvidencia(idInspeccion, item.criterio, item.evidencia);
+        }
+      }
+
+      Swal.fire("Éxito", "Inspección guardada", "success").then(() =>
+        navigate("/ordenesdisponibles")
       );
-      setNotas("");
     } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: "No se pudo guardar la inspección.",
-        icon: "error",
-        confirmButtonColor: "#2f6d6d",
-      });
+      Swal.fire("Error", error.message || "No se pudo registrar", "error");
     }
   };
 
@@ -120,15 +151,22 @@ export default function RegistrarInspeccion() {
 
           <h1 className="titulo">Registrar Inspección</h1>
           <p className="subtexto">
-            Completa el checklist de control de calidad para esta orden de producción. 
-            Registra observaciones si es necesario.
+            Completa el checklist de control de calidad para esta orden de
+            producción. Registra observaciones si es necesario.
           </p>
-
-          <div className="info-op-box">
-          <p style={{ color: '#000' }}><strong>Código OP:</strong> OP-2025-002</p>
-  <p style={{ color: '#000' }}><strong>Producto:</strong> Polo de Algodón</p>
-<p style={{ color: '#000' }}><strong>Cantidad:</strong> 150 prendas</p>
-          </div>
+          {ordenInfo && (
+            <div className="info-op-box">
+              <p style={{ color: "#000" }}>
+                <strong>Código OP:</strong> {ordenInfo.CodigoOp}
+              </p>
+              <p style={{ color: "#000" }}>
+                <strong>Producto:</strong> {ordenInfo.Modelo}
+              </p>
+              <p style={{ color: "#000" }}>
+                <strong>Cantidad:</strong> {ordenInfo.Cantidad} prendas
+              </p>
+            </div>
+          )}
 
           <table className="tabla-inspeccion">
             <thead>
@@ -142,17 +180,21 @@ export default function RegistrarInspeccion() {
             <tbody>
               {inspeccion.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.criterio}</td>
+                  <td>{item.pregunta}</td>
 
                   <td className="respuesta-buttons">
                     <button
-                      className={`btn-respuesta ${item.respuesta === true ? "si" : ""}`}
+                      className={`btn-respuesta ${
+                        item.respuesta === true ? "si" : ""
+                      }`}
                       onClick={() => handleRespuesta(index, true)}
                     >
                       ✓
                     </button>
                     <button
-                      className={`btn-respuesta ${item.respuesta === false ? "no" : ""}`}
+                      className={`btn-respuesta ${
+                        item.respuesta === false ? "no" : ""
+                      }`}
                       onClick={() => handleRespuesta(index, false)}
                     >
                       ✕
@@ -197,7 +239,12 @@ export default function RegistrarInspeccion() {
           </div>
 
           <div className="botones-acciones">
-            <button className="btn-cancelar">Cancelar</button>
+            <button
+              className="btn-cancelar"
+              onClick={() => navigate("/ordenesdisponibles")}
+            >
+              Cancelar
+            </button>
             <button className="btn-guardar" onClick={handleGuardar}>
               Guardar
             </button>

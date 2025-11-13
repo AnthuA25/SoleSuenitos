@@ -8,8 +8,10 @@ import {
   agregarComentario,
   listarComentarios,
   listarOrdenesDisponibles,
+  marcarComentarioLeido,
 } from "../../api/ordenesDisponibles";
 import Swal from "sweetalert2";
+import { FiBell } from "react-icons/fi";
 
 function OrdenesDisponibles() {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ function OrdenesDisponibles() {
   const [comentariosOrden, setComentariosOrden] = useState([]);
   const [nuevoComentario, setNuevoComentario] = useState("");
   const [ordenSeleccionada, setOrdenSeleccionada] = useState(null);
+  const usuarioActual = JSON.parse(localStorage.getItem("usuario"));
 
   useEffect(() => {
     const cargarOrdenes = async () => {
@@ -41,7 +44,22 @@ function OrdenesDisponibles() {
     setOrdenSeleccionada(orden);
     try {
       const comentarios = await listarComentarios(orden.idOp);
-      setComentariosOrden(comentarios);
+
+      await Promise.all(
+        comentarios
+          .filter((c) => !c.leido && c.idUsuario !== usuarioActual.id)
+          .map((c) => marcarComentarioLeido(c.idCom))
+      );
+
+      const comentariosActualizados = await listarComentarios(orden.idOp);
+      setComentariosOrden(comentariosActualizados);
+      setOrdenes((prev) =>
+        prev.map((o) =>
+          o.idOp === orden.idOp
+            ? { ...o, comentarios: comentariosActualizados }
+            : o
+        )
+      );
     } catch {
       setComentariosOrden([]);
     }
@@ -67,6 +85,14 @@ function OrdenesDisponibles() {
       const comentarios = await listarComentarios(ordenSeleccionada.idOp);
       setComentariosOrden(comentarios);
       setNuevoComentario("");
+
+      setOrdenes((prev) =>
+        prev.map((o) =>
+          o.idOp === ordenSeleccionada.idOp
+            ? { ...o, comentarios: comentarios }
+            : o
+        )
+      );
     } catch (error) {
       Swal.fire({
         title: "Error al agregar comentario",
@@ -78,9 +104,10 @@ function OrdenesDisponibles() {
   };
 
   const handleVerOptimizaciones = (idOp) => {
-    navigate(`/historialoptiope/${idOp}`),{
-      state:{codigoOp:idOp.codigoOp, modelo:idOp.modelo}
-    }
+    navigate(`/historialoptiope/${idOp}`),
+      {
+        state: { codigoOp: idOp.codigoOp, modelo: idOp.modelo },
+      };
   };
 
   return (
@@ -184,7 +211,7 @@ function OrdenesDisponibles() {
                         ? new Date(orden.fechaCreacion).toLocaleDateString()
                         : "-"}
                     </td>
-                    <td style={{ padding: 12 }}>
+                    <td style={{ padding: 12, position: "relative" }}>
                       <button
                         onClick={() => abrirModal(orden)}
                         style={{
@@ -195,9 +222,30 @@ function OrdenesDisponibles() {
                           textDecoration: "underline",
                           fontSize: 14,
                           fontWeight: 500,
+                          position: "relative",
                         }}
                       >
-                        [ Ver ({orden.comentarios?.length || orden.Comentarios?.length || 0}) ]
+                        [ Ver (
+                        {orden.comentarios?.length ||
+                          orden.Comentarios?.length ||
+                          0}
+                        ) ]
+                        {/*Mostrar campana solo si hay comentarios sin leer de otro usuario */}
+                        {orden.comentarios?.some(
+                          (c) => !c.leido && c.idUsuario !== usuarioActual.id
+                        ) && (
+                          <FiBell
+                            title="Nuevo comentario de otro usuario"
+                            style={{
+                              position: "absolute",
+                              top: 60,
+                              // right: -12,
+                              color: "#f39c12",
+                              fontSize: 18,
+                              animation: "campana 1.5s infinite",
+                            }}
+                          />
+                        )}
                       </button>
                     </td>
                     <td style={{ padding: 12 }}>
