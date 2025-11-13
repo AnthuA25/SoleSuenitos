@@ -17,12 +17,13 @@ export const listarOrdenesDisponibles = async () => {
     }));
   } catch (error) {
     console.error("Error al listar órdenes disponibles:", error);
-    throw error.response?.data || {
-      message: "Error al listar órdenes disponibles.",
-    };
+    throw (
+      error.response?.data || {
+        message: "Error al listar órdenes disponibles.",
+      }
+    );
   }
 };
-
 
 export const obtenerOrden = async (idOp) => {
   const response = await api.get(`/InspeccionesCalidad/orden/${idOp}`, {
@@ -64,4 +65,46 @@ export const subirEvidencia = async (idInspeccion, criterio, archivo) => {
     console.error("Error al subir evidencia:", error);
     throw error.response?.data || { message: "Error al subir evidencia" };
   }
+};
+
+export const listarInspecciones = async () => {
+  try {
+    const response = await api.get("/InspeccionesCalidad/listar", {
+      withCredentials: true,
+    });
+
+    return response.data.map((i) => ({
+      id: i.IdInspeccion,
+      codigo: i.CodigoInspeccion,
+      producto: i.Producto,
+      fecha: new Date(i.Fecha).toLocaleDateString(),
+      orden: i.OrdenProduccion,
+      resultado: i.Resultado,
+      estado: i.Estado,
+      inspector: i.Inspector,
+    }));
+  } catch (error) {
+    console.error("Error al listar inspecciones:", error);
+    throw error.response?.data || { message: "Error al listar inspecciones" };
+  }
+};
+export const obtenerInspeccion = async (id) => {
+  const response = await api.get(`/InspeccionesCalidad/${id}`, {
+    withCredentials: true,
+  });
+  return response.data;
+};
+
+export const descargarReporte = (id) => {
+  window.open(
+    `${api.defaults.baseURL}/InspeccionesCalidad/reporte/${id}`,
+    "_blank"
+  );
+};
+
+export const eliminarInspeccion = async (id) => {
+  const response = await api.delete(`/InspeccionesCalidad/${id}`, {
+    withCredentials: true,
+  });
+  return response.data;
 };

@@ -36,7 +36,6 @@ function HistorialMoldes() {
     fetchData();
   }, []);
 
-
   const handleBuscar = async () => {
     if (!busqueda.trim()) {
       const data = await listarMoldes();
@@ -48,12 +47,6 @@ function HistorialMoldes() {
       const resultados = await buscarMoldes(filtro, busqueda);
       setMoldes(resultados);
     } catch (error) {
-      Swal.fire({
-        title: "Sin resultados",
-        text: error.message || "No se encontraron moldes con ese criterio.",
-        icon: "info",
-        confirmButtonColor: "#2f6d6d",
-      });
       setMoldes([]);
     }
   };
@@ -84,7 +77,6 @@ function HistorialMoldes() {
       });
     }
   };
-
 
   const handleEliminar = async (idMolde) => {
     const confirm = await Swal.fire({
@@ -123,7 +115,6 @@ function HistorialMoldes() {
 
   // const handleRegistrar = () => navigate("/moldes");
 
-
   return (
     <div className="gestion-container">
       <div className="gestion-box">
@@ -142,7 +133,7 @@ function HistorialMoldes() {
         {/* Contenido principal */}
         <div className="gestion-contenttt">
           {/* HEADER superior */}
-          <div className="gestion-header" style={{marginTop:"-60px"}}>
+          <div className="gestion-header" style={{ marginTop: "-60px" }}>
             <UserHeader nombreUsuario="Sole Sueñitos" />
           </div>
 
@@ -183,7 +174,7 @@ function HistorialMoldes() {
               onClick={async () => {
                 try {
                   setBusqueda("");
-                  const data = await listarMoldes(); 
+                  const data = await listarMoldes();
                   setMoldes(data);
                 } catch (error) {
                   Swal.fire({
@@ -216,7 +207,20 @@ function HistorialMoldes() {
               </tr>
             </thead>
             <tbody>
-              {moldes.length > 0 ? (
+              {moldes.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="5"
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#666",
+                    }}
+                  >
+                    No hay moldes registrados
+                  </td>
+                </tr>
+              ) : (
                 moldes.map((m) => (
                   <tr key={m.idMolde}>
                     <td style={{ color: "gray" }}>{m.codigoMolde}</td>
@@ -239,23 +243,12 @@ function HistorialMoldes() {
                     </td>
                   </tr>
                 ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="5"
-                    style={{ textAlign: "center", color: "gray" }}
-                  >
-                    No se encontraron moldes
-                  </td>
-                </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-
-    
   );
 }
 
