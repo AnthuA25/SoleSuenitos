@@ -55,6 +55,18 @@ namespace back_net.Controllers
                 ? string.Join(" | ", dto.Observaciones)
                 : "";
 
+            int totalCriterios = 4;
+            int cumplidos = 0;
+
+            if (dto.PiezasUnidas) cumplidos++;
+            if (dto.TelaSinDefectos) cumplidos++;
+            if (dto.CosturasOk) cumplidos++;
+            if (dto.ListaParaEntrega) cumplidos++;
+
+            string resultadoTexto = $"Cumple {cumplidos} de {totalCriterios} criterios";
+
+            string estado = cumplidos == totalCriterios ? "APROBADO" : "RECHAZADO";
+
             var inspeccion = new InspeccionesCalidad
             {
                 IdOp = dto.IdOp,
@@ -66,8 +78,8 @@ namespace back_net.Controllers
                 CosturasOk = dto.CosturasOk,
                 ListaParaEntrega = dto.ListaParaEntrega,
                 Observaciones = observacionesTexto,
-                ResultadoFinal = dto.ResultadoFinal,
-                NotaAdicional = dto.NotaAdicional
+                ResultadoFinal = estado,
+                NotaAdicional = dto.NotaAdicional,
             };
 
             _context.InspeccionesCalidads.Add(inspeccion);
@@ -106,7 +118,7 @@ namespace back_net.Controllers
                     Producto = i.IdOpNavigation.Modelo,
                     OrdenProduccion = i.IdOpNavigation.CodigoOp,
                     Resultado = i.ResultadoFinal,
-                    Estado = "Finalizado",
+                    Estado = i.ResultadoFinal,
                     Inspector = i.IdUsuarioInspectorNavigation.NombreCompleto
                 })
                 .ToListAsync();
@@ -114,7 +126,7 @@ namespace back_net.Controllers
             return Ok(inspecciones);
         }
 
-        // 🔍 Ver detalle de una inspección
+        // Ver detalle de una inspección
         [HttpGet("{id}")]
         [Authorize(Policy = "SoloInspectorCalidad")]
         public async Task<IActionResult> ObtenerInspeccion(int id)
@@ -146,7 +158,7 @@ namespace back_net.Controllers
             });
         }
 
-        // 🗑️ Eliminar inspección
+        // Eliminar inspección
         [HttpDelete("{id}")]
         [Authorize(Policy = "SoloInspectorCalidad")]
         public async Task<IActionResult> EliminarInspeccion(int id)
@@ -181,6 +193,48 @@ namespace back_net.Controllers
                 .ToListAsync();
 
             return Ok(ordenes);
+        }
+
+        [HttpGet("reporte/{id}")]
+        [Authorize(Policy = "SoloInspectorCalidad")]
+        public async Task<IActionResult> GenerarReportePdf(int id)
+        {
+            var inspeccion = await _context.InspeccionesCalidads
+                .Include(i => i.IdOpNavigation)
+                .Include(i => i.IdUsuarioInspectorNavigation)
+                .FirstOrDefaultAsync(i => i.IdInspeccion == id);
+
+            if (inspeccion == null)
+                return NotFound();
+
+            // Construir contenido PDF
+            var texto = $@"
+                REPORTE DE INSPECCIÓN DE CALIDAD
+                Fecha: {inspeccion.FechaInspeccion}
+
+                INSPECTOR: {inspeccion.IdUsuarioInspectorNavigation.NombreCompleto}
+
+                ORDEN DE PRODUCCIÓN
+                Código OP: {inspeccion.IdOpNavigation.CodigoOp}
+                Modelo: {inspeccion.IdOpNavigation.Modelo}
+                Cantidad: {inspeccion.IdOpNavigation.Cantidad}
+
+                CRITERIOS
+                - Piezas unidas: {(inspeccion.PiezasUnidas.GetValueOrDefault() ? "✔" : "✘")}
+                - Tela sin defectos: {(inspeccion.TelaSinDefectos.GetValueOrDefault() ? "✔" : "✘")}
+                - Costuras correctas: {(inspeccion.CosturasOk.GetValueOrDefault() ? "✔" : "✘")}
+                - Lista para entrega: {(inspeccion.ListaParaEntrega.GetValueOrDefault() ? "✔" : "✘")}
+
+                OBSERVACIONES
+                {inspeccion.Observaciones}
+
+                RESULTADO FINAL: {inspeccion.ResultadoFinal}
+                NOTA ADICIONAL: {inspeccion.NotaAdicional}
+";
+
+            var pdfBytes = System.Text.Encoding.UTF8.GetBytes(texto);
+
+            return File(pdfBytes, "application/pdf", $"Reporte_{inspeccion.CodigoInspeccion}.pdf");
         }
 
         [HttpGet("orden/{idOp}")]
