@@ -196,56 +196,65 @@ function HistorialMoldes() {
           </div>
 
           {/* Tabla */}
-          <table className="historial-tabla">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Versión</th>
-                <th>Fecha</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {moldes.length === 0 ? (
+          <div
+            style={{
+              overflowX: "auto",
+              background: "white",
+              borderRadius: 10,
+              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            }}
+          >
+            <table className="historial-tabla">
+              <thead>
                 <tr>
-                  <td
-                    colSpan="5"
-                    style={{
-                      textAlign: "center",
-                      padding: "20px",
-                      color: "#666",
-                    }}
-                  >
-                    No hay moldes registrados
-                  </td>
+                  <th>Código</th>
+                  <th>Nombre</th>
+                  <th>Versión</th>
+                  <th>Fecha</th>
+                  <th>Acción</th>
                 </tr>
-              ) : (
-                moldes.map((m) => (
-                  <tr key={m.idMolde}>
-                    <td style={{ color: "gray" }}>{m.codigoMolde}</td>
-                    <td style={{ color: "gray" }}>{m.nombreMolde}</td>
-                    <td style={{ color: "gray" }}>{m.versionMolde}</td>
-                    <td style={{ color: "gray" }}>
-                      {new Date(m.fechaSubida).toLocaleDateString()}
-                    </td>
-                    <td className="tabla-acciones" style={{ color: "gray" }}>
-                      <FaEye
-                        className="icono-ver"
-                        title="Ver detalles"
-                        onClick={() => handleVer(m)}
-                      />
-                      <FaTrashAlt
-                        className="icono-eliminar"
-                        title="Eliminar"
-                        onClick={() => handleEliminar(m.idMolde)}
-                      />
+              </thead>
+              <tbody>
+                {moldes.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      style={{
+                        textAlign: "center",
+                        padding: "20px",
+                        color: "#666",
+                      }}
+                    >
+                      No hay moldes registrados
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  moldes.map((m) => (
+                    <tr key={m.idMolde}>
+                      <td style={{ color: "gray" }}>{m.codigoMolde}</td>
+                      <td style={{ color: "gray" }}>{m.nombreMolde}</td>
+                      <td style={{ color: "gray" }}>{m.versionMolde}</td>
+                      <td style={{ color: "gray" }}>
+                        {new Date(m.fechaSubida).toLocaleDateString()}
+                      </td>
+                      <td className="tabla-acciones" style={{ color: "gray" }}>
+                        <FaEye
+                          className="icono-ver"
+                          title="Ver detalles"
+                          onClick={() => handleVer(m)}
+                        />
+                        <FaTrashAlt
+                          className="icono-eliminar"
+                          title="Eliminar"
+                          onClick={() => handleEliminar(m.idMolde)}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
